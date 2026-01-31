@@ -1,0 +1,106 @@
+import { z } from "zod";
+import * as utils from "../utils.js";
+import { Tool, ToolSchema } from "@modelcontextprotocol/sdk/types.js";
+import { zodToJsonSchema } from "zod-to-json-schema";
+import { Logger } from "winston";
+
+const ToolInputSchema = ToolSchema.shape.inputSchema;
+type ToolInput = z.infer<typeof ToolInputSchema>;
+
+export const extensionsPhoneCallEventsDeleteToolName = "extensions-phone-call-events-delete";
+export const extensionsPhoneCallEventsDeleteToolDescription = "Allows allows deleting a phone call event in particular contexts such as User, Organization or global.";
+
+// Tool Schema
+export const ExtensionsPhoneCallEventsDeleteToolSchema = z.object({
+    userId: z.string().describe("Id of the User which owns the Extension for which the event is deleted. Possible values: @me,@viewer,@owner,<user_id>").default("@me"),
+    extension: z.string().describe("Number of the Extension for which the event is deleted. Allowed Extension types: Phone Terminal, Queue, Conference, and IVR. Cannot be set to @self."),
+    eventType: z.enum(["0", "1", "2", "3", "4"]).optional().describe("Type of the Phone Call Event. Possible values: 0 - Dial-In, 1 - Dial-Out, 2 - Hangup, 3 - Answer incoming call, 4 - Answer outgoing call."),
+    eventID: z.string().optional().describe("The Id of the phone call event to be updated. When missing all events for Extension are deleted."),
+}).strict();
+
+// Tool definition
+export const EXTENSIONS_PHONE_CALL_EVENTS_DELETE_TOOL: Tool = {
+    name: extensionsPhoneCallEventsDeleteToolName,
+    description: extensionsPhoneCallEventsDeleteToolDescription,
+    inputSchema: zodToJsonSchema(ExtensionsPhoneCallEventsDeleteToolSchema) as ToolInput,
+}
+
+export async function runExtensionsPhoneCallEventsDeleteTool(
+    args: z.infer<typeof ExtensionsPhoneCallEventsDeleteToolSchema>,
+    userAgent: string,
+    config: { voipnowUrl: string; voipnowToken: string; },
+    logger: Logger,
+) {
+    const { userId, extension, eventType, eventID } = ExtensionsPhoneCallEventsDeleteToolSchema.parse(args);
+    try {
+        logger.info(`Running ${extensionsPhoneCallEventsDeleteToolName} tool...`);
+        var paramsExtensionsPhoneCallEventsDeleteURL = '';
+
+        // Check eventID
+        if (eventID && !eventType) throw Error("eventID can only be used in combination with eventType");
+
+        // Check extension format
+        if (!utils.validateExtension(extension) || extension === '@self') {
+            if (extension === '@self') {
+                throw new Error(utils.errorMessageExtensionSelf);
+            }
+            throw new Error(utils.errorMessageExtension);
+        }
+
+        // Check if userId starts with '@' for some values
+        let modifiedUserId = userId;
+        if (['me', 'viewer', 'owner'].includes(userId) && !userId.startsWith('@')) {
+            modifiedUserId = '@' + userId;
+        }
+
+        // Handle path parameter for extensions
+        paramsExtensionsPhoneCallEventsDeleteURL = paramsExtensionsPhoneCallEventsDeleteURL.concat(
+            modifiedUserId && extension ? `${modifiedUserId}/${extension}/phoneCallEvents/` : '',
+            eventType ? `${eventType}/` : '',
+            eventID ? `${eventID}/` : ''
+        );
+
+        logger.debug(`Deleting phone call events for ${config.voipnowUrl}/uapi/extensions/${paramsExtensionsPhoneCallEventsDeleteURL}`);
+        const response = await fetch(utils.createUrl(`${config.voipnowUrl}`, `/uapi/extensions/${paramsExtensionsPhoneCallEventsDeleteURL}`), {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                "User-Agent": userAgent.toString(),
+                "Authorization": `Bearer ${config.voipnowToken}`,
+            },
+            redirect: 'manual' // Prevent automatic redirection
+        });
+
+        // Handle non-2xx responses
+        if (!response.ok) {
+            const errorData = await response.json();
+            if (response.status === 400 || response.status === 401 || response.status === 403 || response.status === 500) {
+                const errorMessage = `{'code': ${errorData.error.code}, 'message': ${errorData.error.message}}`
+                throw new Error(errorMessage);
+            }
+            const errorMessage = `{'status': ${response.status}, 'statusText': ${response.statusText}}, 'body': ${JSON.stringify(errorData.error)}}`
+            throw new Error(errorMessage);
+        }
+
+        const responseData = await response.json();
+        return {
+            content: [
+                {
+                    type: "text",
+                    text: JSON.stringify(responseData),
+                },
+            ],
+        };
+    } catch (error) {
+        const errorMessage = `Error deleting phone call event: ${error instanceof Error ? error.message : String(error)}`
+        logger.error(errorMessage);
+        return {
+            content: [
+                {
+                    type: "text",
+                    text: errorMessage,
+                },
+            ],
+        };
+    }
+}

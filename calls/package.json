@@ -1,0 +1,42 @@
+{
+  "name": "mcp-voipnow-calls",
+  "version": "5.7.0",
+  "description": "Managing VoipNow phone calls, CDR records, extensions, and fax operations",
+  "type": "module",
+  "bin": {
+    "voipnow": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "./node_modules/.bin/tsc && node --input-type=module -e \"import fs from 'fs'; fs.chmodSync('dist/index.js', '755')\""
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.21.1",
+    "chokidar": "4.0.3",
+    "commander": "^14.0.2",
+    "express": "^5.1.0",
+    "net": "1.0.2",
+    "unix-dgram": "^2.0.7",
+    "winston": "^3.18.3",
+    "winston-syslog": "2.7.1",
+    "zod": "^3.25.76",
+    "zod-to-json-schema": "^3.24.6"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.5",
+    "@types/node": "^24.10.1",
+    "@types/winston-syslog": "^2.4.4",
+    "typescript": "^5.9.3"
+  },
+  "main": "src/index.ts",
+  "keywords": [],
+  "author": {
+    "name": "4PSA",
+    "email": "devel@4psa.com",
+    "url": "https://www.4psa.com/"
+  },
+  "license": "MIT"
+}

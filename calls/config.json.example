@@ -1,0 +1,8 @@
+{
+    "appId":"<app_id>",
+    "appSecret":"<app_secret>",
+    "voipnowHost":"<voipnow_host>",
+    "voipnowTokenFile":"<path_to_token_file>/.access_token",
+    "authTokenMCP":"<auth_token>",
+    "logLevel":"<log_level>"
+}

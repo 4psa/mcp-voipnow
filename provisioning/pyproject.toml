@@ -1,0 +1,18 @@
+[project]
+name = "mcp-voipnow-provisioning"
+version = "5.7.0"
+description = "Managing VoipNow entities, users, organizations, and service providers"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    { name = "4PSA", email = "devel@4psa.com", url = "https://www.4psa.com/" },
+]
+license = "MIT"
+dependencies = [
+    "jsonschema>=4.24.0",
+    "mcp[cli]>=1.8.1",
+    "requests>=2.32.3",
+    "uvicorn>=0.34.2",
+    "watchdog>=6.0.0",
+    "zeep>=4.3.1",
+]

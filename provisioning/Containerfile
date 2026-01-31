@@ -1,0 +1,22 @@
+FROM python:3.12-alpine
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Install uv
+RUN pip install --no-cache-dir uv
+
+# Copy the application files
+COPY pyproject.toml ./
+COPY .python-version ./
+COPY src/ src/
+
+# Build the environment
+RUN uv sync
+
+LABEL org.opencontainers.image.title="VoipNow Provisioning MCP server"
+LABEL org.opencontainers.image.description="To be used for running VoipNow Provisioning MCP server"
+LABEL org.opencontainers.image.vendor="4PSA, Inc"
+
+# Specify the command to run the application
+ENTRYPOINT ["uv", "--directory","/app", "run", "src/main.py"]

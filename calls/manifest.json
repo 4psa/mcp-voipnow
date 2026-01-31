@@ -1,0 +1,130 @@
+{
+  "manifest_version": "0.2",
+  "name": "mcp-voipnow-calls",
+  "display_name": "VoipNow Calls MCP",
+  "version": "5.7.0",
+  "description": "Managing VoipNow phone calls, CDR records, extensions, and fax operations",
+  "author": {
+    "name": "4PSA",
+    "email": "devel@4psa.com",
+    "url": "https://www.4psa.com/"
+  },
+  "homepage": "https://github.com/4psainc/mcp-voipnow/tree/master/calls",
+  "documentation": "https://github.com/4psainc/mcp-voipnow/tree/master/calls#readme",
+  "support": "https://github.com/4psainc/mcp-voipnow/issues",
+  "server": {
+    "type": "node",
+    "entry_point": "dist/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": [
+        "${__dirname}/dist/index.js",
+        "-c",
+        "${user_config.config_path}"
+      ]
+    }
+  },
+  "user_config": {
+    "config_path": {
+      "type": "file",
+      "title": "Config File",
+      "description": "Config File",
+      "required": true,
+      "default": ["${HOME}/Documents/config.json"]
+    }
+  },
+  "license": "MIT",
+  "compatibility": {
+    "claude_desktop": ">=0.10.0",
+    "platforms": ["darwin", "win32", "linux"],
+    "runtimes": {
+      "node": ">=18.0.0"
+    }
+  },
+ "tools": [
+    {
+      "name": "cdr-list",
+      "description": "Get the list of call history records from VoipNow."
+    },
+    {
+      "name": "phone-calls-create",
+      "description": "Create a phone call based on the input arguments."
+    },
+    {
+      "name": "phone-calls-delete",
+      "description": "Allows hanging up phone calls in particular contexts."
+    },
+    {
+      "name": "phone-calls-list",
+      "description": "Allows listing of phone call resources in particular contexts."
+    },
+    {
+      "name": "phone-calls-update-monitor",
+      "description": "Allows monitoring of a phone call."
+    },
+    {
+      "name": "phone-calls-update-onhold-offhold",
+      "description": "Put on hold/take off hold a phone call."
+    },
+    {
+      "name": "phone-calls-update-park",
+      "description": "Park a phone call."
+    },
+    {
+      "name": "phone-calls-update-unpark",
+      "description": "Retrieve a phone call from the parking lot."
+    },
+    {
+      "name": "phone-calls-update-pickup-bargein",
+      "description": "Pick up/barge in on a phone call."
+    },
+    {
+      "name": "phone-calls-update-start-stop-recording",
+      "description": "Start/stop recording of a phone call."
+    },
+    {
+      "name": "phone-calls-update-transfer",
+      "description": "Transfer a phone call."
+    },
+    {
+      "name": "phone-calls-update-transfer-tovoicemail",
+      "description": "Transfer a phone call to voicemail."
+    },
+    {
+      "name": "phone-calls-update-whisper",
+      "description": "Whisper on a phone call."
+    },
+    {
+      "name": "extensions-presence",
+      "description": "List the registration status of extensions."
+    },
+    {
+      "name": "extensions-queue-agents-list",
+      "description": "List all agents registered to a queue."
+    },
+    {
+      "name": "extensions-queue-agents-update",
+      "description": "Update the status of an agent."
+    },
+    {
+      "name": "extensions-phone-call-events-create",
+      "description": "Allows adding new phone call events."
+    },
+    {
+      "name": "extensions-phone-call-events-list",
+      "description": "Allows listing phone call events."
+    },
+    {
+      "name": "extensions-phone-call-events-update",
+      "description": "Allows updating existing phone call events."
+    },
+    {
+      "name": "extensions-phone-call-events-delete",
+      "description": "Allows deleting a phone call event."
+    },
+    {
+      "name": "faxes-create",
+      "description": "Allows sending faxes."
+    }
+  ]
+}

@@ -1,0 +1,317 @@
+{
+  "manifest_version": "0.2",
+  "name": "mcp-voipnow-provisioning",
+  "display_name": "VoipNow Provisioning MCP",
+  "version": "5.7.0",
+  "description": "Managing VoipNow entities, users, organizations, and service providers",
+  "author": {
+    "name": "4PSA",
+    "email": "devel@4psa.com",
+    "url": "https://www.4psa.com/"
+  },
+  "homepage": "https://github.com/4psainc/mcp-voipnow/tree/master/provisioning",
+  "documentation": "https://github.com/4psainc/mcp-voipnow/tree/master/provisioning#readme",
+  "support": "https://github.com/4psainc/mcp-voipnow/issues",
+  "server": {
+    "type": "python",
+    "entry_point": "src/main.py",
+    "mcp_config": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        "${__dirname}",
+        "src/main.py",
+        "-c",
+        "${user_config.config_path}"
+      ]
+    }
+  },
+  "user_config": {
+    "config_path": {
+      "type": "file",
+      "title": "Config File",
+      "description": "Config File",
+      "required": true,
+      "default": ["${HOME}/Documents/config.json"]
+    }
+  },
+  "license": "MIT",
+  "compatibility": {
+    "claude_desktop": ">=0.10.0",
+    "platforms": ["darwin", "win32", "linux"],
+    "runtimes": {
+      "python": ">=3.10"
+    }
+  },
+  "tools": [
+    {
+      "name": "add",
+      "description": "Add entity (users, organizations, service providers). Hierarchy: Admin -> ServiceProvider (parent=Admin) -> Organization (parent=ServiceProvider) -> User (parent=Organization) -> Extension (parent=User)."
+    },
+    {
+      "name": "get",
+      "description": "Retrieve entities (users, organizations, service providers). Hierarchy: Admin -> ServiceProvider (parent=Admin) -> Organization (parent=ServiceProvider) -> User (parent=Organization) -> Extension (parent=User). Use parentID to filter."
+    },
+    {
+      "name": "edit",
+      "description": "Edit entity (users, organizations, service providers). Hierarchy: Admin -> ServiceProvider (parent=Admin) -> Organization (parent=ServiceProvider) -> User (parent=Organization) -> Extension (parent=User). Specify entity with ID or identifier."
+    },
+    {
+      "name": "delete",
+      "description": "Delete entity (users, organizations, service providers). Hierarchy: Admin -> ServiceProvider (parent=Admin) -> Organization (parent=ServiceProvider) -> User (parent=Organization) -> Extension (parent=User). WARNING: Deleting higher-level entities cascades to children."
+    },
+    {
+      "name": "get-details",
+      "description": "Retrieve entity details by ID or identifier."
+    },
+    {
+      "name": "get-user-groups",
+      "description": "Retrieve a list of group IDs for a user by ID or identifier."
+    },
+    {
+      "name": "move-organization",
+      "description": "Move an organization to a specific service provider."
+    },
+    {
+      "name": "set-control-panel-access",
+      "description": "Set control panel access for a user, organization, or service provider by ID or identifier."
+    },
+    {
+      "name": "set-status",
+      "description": "Set the status for a user, organization, or service provider by ID or identifier."
+    },
+    {
+      "name": "set-permissions-limits",
+      "description": "Set permissions and limits for an entity (users, organizations, service providers) by ID or identifier."
+    },
+    {
+      "name": "get-permissions-limits",
+      "description": "Retrieve permissions and limits for an entity by ID or identifier."
+    },
+    {
+      "name": "update-permissions-limits",
+      "description": "Update permissions and limits for an entity (users, organizations, service providers) by ID or identifier."
+    },
+    {
+      "name": "get-charging-plans",
+      "description": "Retrieve charging plans."
+    },
+    {
+      "name": "get-charging-packages",
+      "description": "Retrieve charging packages."
+    },
+    {
+      "name": "get-charging-plan-details",
+      "description": "Retrieve charging plan details."
+    },
+    {
+      "name": "get-destination-exceptions",
+      "description": "Retrieve destination exceptions."
+    },
+    {
+      "name": "get-recharges",
+      "description": "Retrieve recharges."
+    },
+    {
+      "name": "add-extension",
+      "description": "Add extension to a User. Hierarchy: Admin -> ServiceProvider (parent=Admin) -> Organization (parent=ServiceProvider) -> User (parent=Organization) -> Extension (parent=User). Extensions belong to Users (parentID = User ID)."
+    },
+    {
+      "name": "get-extensions",
+      "description": "Retrieve extensions. Hierarchy: Admin -> ServiceProvider (parent=Admin) -> Organization (parent=ServiceProvider) -> User (parent=Organization) -> Extension (parent=User). Filter by User with parentID."
+    },
+    {
+      "name": "delete-extension",
+      "description": "Delete the extension for the provided extended number."
+    },
+    {
+      "name": "get-provision-file",
+      "description": "Retrieve the provision file for the provided extended number."
+    },
+    {
+      "name": "get-queue-agents",
+      "description": "Retrieve the agents for the provided queue."
+    },
+    {
+      "name": "get-queue-membership",
+      "description": "Retrieve the membership for the provided queue."
+    },
+    {
+      "name": "get-scheduled-conferences",
+      "description": "Retrieve the scheduled conferences for the provided extension."
+    },
+    {
+      "name": "get-scheduled-conference-details",
+      "description": "Retrieve the scheduled conference details for the provided extension."
+    },
+    {
+      "name": "get-auth-caller-id",
+      "description": "Retrieve the auth caller id for the provided extended number"
+    },
+    {
+      "name": "get-auth-caller-id-recharges",
+      "description": "Retrieve the auth caller id recharges for the provided extended number"
+    },
+    {
+      "name": "get-available-caller-id",
+      "description": "Retrieve the available caller id for the provided extended number"
+    },
+    {
+      "name": "get-call-recording-settings",
+      "description": "Retrieve the call recording settings for the provided extension"
+    },
+    {
+      "name": "get-call-rules-in",
+      "description": "Retrieve the inbound call rules for the provided extension"
+    },
+    {
+      "name": "get-card-code",
+      "description": "Retrieve calling card details by ID, filter or extension"
+    },
+    {
+      "name": "get-card-code-recharges",
+      "description": "Retrieve recharge operations for a calling card"
+    },
+    {
+      "name": "get-conference-settings",
+      "description": "Retrieve conference settings for the provided extension"
+    },
+    {
+      "name": "get-extension-details",
+      "description": "Retrieve details for the provided extension"
+    },
+    {
+      "name": "get-extension-settings",
+      "description": "Retrieve settings for the provided extension"
+    },
+    {
+      "name": "get-fax-center-settings",
+      "description": "Retrieve fax center settings for the provided extension"
+    },
+    {
+      "name": "get-scheduled-conference-sessions",
+      "description": "Retrieve the scheduled conference sessions for the provided extension"
+    },
+    {
+      "name": "get-sip-preferences",
+      "description": "Retrieve SIP preferences for the provided extension"
+    },
+    {
+      "name": "get-voicemail-settings",
+      "description": "Retrieve voicemail settings for the provided extension"
+    },
+    {
+      "name": "get-regions",
+      "description": "Retrieve regions for the provided code"
+    },
+    {
+      "name": "get-phone-languages",
+      "description": "Retrieve phone languages."
+    },
+    {
+      "name": "get-interface-languages",
+      "description": "Retrieve interface languages."
+    },
+    {
+      "name": "get-timezone",
+      "description": "Retrieve timezone."
+    },
+    {
+      "name": "get-custom-alerts",
+      "description": "Retrieve custom alerts for the provided user ID or user identifier."
+    },
+    {
+      "name": "get-custom-buttons",
+      "description": "Retrieve custom buttons for the provided user ID or user identifier."
+    },
+    {
+      "name": "get-device-details",
+      "description": "Retrieve details for the provided device ID or serial."
+    },
+    {
+      "name": "get-devices",
+      "description": "Retrieve devices for the provided owner ID, user ID, user identifier, assigned organization ID, or assigned extensions."
+    },
+    {
+      "name": "get-equipment-list",
+      "description": "Retrieve equipment list."
+    },
+    {
+      "name": "get-file-languages",
+      "description": "Retrieve file languages."
+    },
+    {
+      "name": "get-folders",
+      "description": "Retrieve folders for the provided user ID or user identifier."
+    },
+    {
+      "name": "get-owned-sounds",
+      "description": "Retrieve owned sounds for the provided user ID or user identifier."
+    },
+    {
+      "name": "get-schema-versions",
+      "description": "Retrieve schema versions."
+    },
+    {
+      "name": "get-shared-sounds",
+      "description": "Retrieve shared sounds for the provided user ID or user identifier."
+    },
+    {
+      "name": "get-templates",
+      "description": "Retrieve templates for the provided user ID or user identifier."
+    },
+    {
+      "name": "get-time-interval-blocks",
+      "description": "Retrieve time intervals blocks for the provided user ID or user identifier"
+    },
+    {
+      "name": "get-time-intervals",
+      "description": "Retrieve time intervals for the provided time interval block ID."
+    },
+    {
+      "name": "call-costs",
+      "description": "Retrieve call costs for a specific user"
+    },
+    {
+      "name": "call-report",
+      "description": "Retrieve call report for a specific user"
+    },
+    {
+      "name": "quick-stats",
+      "description": "Retrieve quick stats for a specific entity"
+    },
+    {
+      "name": "get-channels",
+      "description": "Retrieve channels."
+    },
+    {
+      "name": "get-codecs",
+      "description": "Retrieve codecs."
+    },
+    {
+      "name": "get-public-no",
+      "description": "Retrieve public no."
+    },
+    {
+      "name": "get-public-no-poll",
+      "description": "Retrieve public no poll."
+    },
+    {
+      "name": "get-call-rules-out",
+      "description": "Retrieve call rules out."
+    },
+    {
+      "name": "get-call-rules-out-group",
+      "description": "Retrieve call rules out group."
+    },
+    {
+      "name": "get-channel-group-poll",
+      "description": "Retrieve channel group poll."
+    },
+    {
+      "name": "get-channel-groups",
+      "description": "Retrieve channel groups."
+    }
+  ]
+}
