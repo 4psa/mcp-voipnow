@@ -432,7 +432,6 @@ Deploy both servers for complete functionality:
 
 For issues, questions, or contributions:
 - **GitHub Issues:** [https://github.com/4psainc/mcp-voipnow/issues](https://github.com/4psainc/mcp-voipnow/issues)
-- **VoipNow Documentation:** [https://red.4psa.me/doc/hg/manual-integration/](https://red.4psa.me/doc/hg/manual-integration/)
 
 ---
 
