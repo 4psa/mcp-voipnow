@@ -1,11 +1,9 @@
 import { z } from "zod";
 import * as utils from "../utils.js";
 import { Tool, ToolSchema } from "@modelcontextprotocol/sdk/types.js";
-import { zodToJsonSchema } from "zod-to-json-schema";
+import { toJsonSchemaCompat } from "@modelcontextprotocol/sdk/server/zod-json-schema-compat.js";
 import { Logger } from "winston";
 
-const ToolInputSchema = ToolSchema.shape.inputSchema;
-type ToolInput = z.infer<typeof ToolInputSchema>;
 
 export const phonecallsUpdateOnholdOffholdToolName = "phone-calls-update-onhold-offhold";
 export const phonecallsUpdateOnholdOffholdToolDescription = "This method allows to 'put on hold'/'take off from hold' a phone call in particular contexts such as User, Organization or global. ";
@@ -25,7 +23,7 @@ export const PhonecallsUpdateOnholdOffholdToolSchema = z.object({
 export const PHONECALLS_UPDATE_ONHOLD_OFFHOLD_TOOL: Tool = {
     name: phonecallsUpdateOnholdOffholdToolName,
     description: phonecallsUpdateOnholdOffholdToolDescription,
-    inputSchema: zodToJsonSchema(PhonecallsUpdateOnholdOffholdToolSchema) as ToolInput,
+    inputSchema: toJsonSchemaCompat(PhonecallsUpdateOnholdOffholdToolSchema, { strictUnions: true, pipeStrategy: 'input' }) as any,
 }
 
 export async function runPhonecallsUpdateOnholdOffholdTool(

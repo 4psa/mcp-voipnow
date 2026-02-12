@@ -1,11 +1,9 @@
 import { z } from "zod";
 import * as utils from "../utils.js";
 import { Tool, ToolSchema } from "@modelcontextprotocol/sdk/types.js";
-import { zodToJsonSchema } from "zod-to-json-schema";
+import { toJsonSchemaCompat } from "@modelcontextprotocol/sdk/server/zod-json-schema-compat.js";
 import { Logger } from "winston";
 
-const ToolInputSchema = ToolSchema.shape.inputSchema;
-type ToolInput = z.infer<typeof ToolInputSchema>;
 
 export const phonecallsUpdateStartStopRecordingToolName = "phone-calls-update-start-stop-recording";
 export const phonecallsUpdateStartStopRecordingToolDescription = "This method allows to 'start a recording of'/'stops the recording of' a phone call in particular contexts such as User, Organization or global. ";
@@ -27,7 +25,7 @@ export const PhonecallsUpdateStartStopRecordingToolSchema = z.object({
 export const PHONECALLS_UPDATE_START_STOP_RECORDING_TOOL: Tool = {
     name: phonecallsUpdateStartStopRecordingToolName,
     description: phonecallsUpdateStartStopRecordingToolDescription,
-    inputSchema: zodToJsonSchema(PhonecallsUpdateStartStopRecordingToolSchema) as ToolInput,
+    inputSchema: toJsonSchemaCompat(PhonecallsUpdateStartStopRecordingToolSchema, { strictUnions: true, pipeStrategy: 'input' }) as any,
 }
 
 export async function runPhonecallsUpdateStartStopRecordingTool(

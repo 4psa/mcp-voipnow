@@ -1,11 +1,9 @@
 import { z } from "zod";
 import * as utils from "../utils.js";
 import { Tool, ToolSchema } from "@modelcontextprotocol/sdk/types.js";
-import { zodToJsonSchema } from "zod-to-json-schema";
+import { toJsonSchemaCompat } from "@modelcontextprotocol/sdk/server/zod-json-schema-compat.js";
 import { Logger } from "winston";
 
-const ToolInputSchema = ToolSchema.shape.inputSchema;
-type ToolInput = z.infer<typeof ToolInputSchema>;
 
 export const extensionsPhoneCallEventsCreateToolName = "extensions-phone-call-events-create";
 export const extensionsPhoneCallEventsCreateToolDescription = "Allows adding new phone call events in particular contexts such as User, Organization or global.";
@@ -26,7 +24,7 @@ export const ExtensionsPhoneCallEventsCreateToolSchema = z.object({
 export const EXTENSIONS_PHONE_CALL_EVENTS_CREATE_TOOL: Tool = {
     name: extensionsPhoneCallEventsCreateToolName,
     description: extensionsPhoneCallEventsCreateToolDescription,
-    inputSchema: zodToJsonSchema(ExtensionsPhoneCallEventsCreateToolSchema) as ToolInput,
+    inputSchema: toJsonSchemaCompat(ExtensionsPhoneCallEventsCreateToolSchema, { strictUnions: true, pipeStrategy: 'input' }) as any,
 }
 
 export async function runExtensionsPhoneCallEventsCreateTool(

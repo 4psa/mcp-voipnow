@@ -1,11 +1,9 @@
 import { z } from "zod";
 import * as utils from "../utils.js";
 import { Tool, ToolSchema } from "@modelcontextprotocol/sdk/types.js";
-import { zodToJsonSchema } from "zod-to-json-schema";
+import { toJsonSchemaCompat } from "@modelcontextprotocol/sdk/server/zod-json-schema-compat.js";
 import { Logger } from "winston";
 
-const ToolInputSchema = ToolSchema.shape.inputSchema;
-type ToolInput = z.infer<typeof ToolInputSchema>;
 
 export const extensionsPresenceListToolName = "extensions-presence-list";
 export const extensionsPresenceListToolDescription = "Query allows to list the registration status of extensions";
@@ -28,7 +26,7 @@ export const ExtensionsPresenceListToolSchema = z.object({
 export const EXTENSIONS_PRESENCE_LIST_TOOL: Tool = {
     name: extensionsPresenceListToolName,
     description: extensionsPresenceListToolDescription,
-    inputSchema: zodToJsonSchema(ExtensionsPresenceListToolSchema) as ToolInput,
+    inputSchema: toJsonSchemaCompat(ExtensionsPresenceListToolSchema, { strictUnions: true, pipeStrategy: 'input' }) as any,
 }
 
 export async function runExtensionsPresenceListTool(

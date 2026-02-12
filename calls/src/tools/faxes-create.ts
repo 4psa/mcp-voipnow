@@ -1,13 +1,11 @@
 import { z } from "zod";
 import * as utils from "../utils.js";
 import { Tool, ToolSchema } from "@modelcontextprotocol/sdk/types.js";
-import { zodToJsonSchema } from "zod-to-json-schema";
+import { toJsonSchemaCompat } from "@modelcontextprotocol/sdk/server/zod-json-schema-compat.js";
 import { Logger } from "winston";
 import { readFile } from "fs/promises";
 import { basename } from "path";
 
-const ToolInputSchema = ToolSchema.shape.inputSchema;
-type ToolInput = z.infer<typeof ToolInputSchema>;
 
 export const faxesCreateToolName = "faxes-create";
 export const faxesCreateToolDescription = "Allows uses to send faxes in particular contexts such as User, Organization or global.";
@@ -25,7 +23,7 @@ export const FaxesCreateToolSchema = z.object({
 export const FAXES_CREATE_TOOL: Tool = {
     name: faxesCreateToolName,
     description: faxesCreateToolDescription,
-    inputSchema: zodToJsonSchema(FaxesCreateToolSchema) as ToolInput,
+    inputSchema: toJsonSchemaCompat(FaxesCreateToolSchema, { strictUnions: true, pipeStrategy: 'input' }) as any,
 }
 
 export async function runFaxesCreateTool(

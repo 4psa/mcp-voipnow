@@ -1,11 +1,9 @@
 import { z } from "zod";
 import * as utils from "../utils.js";
 import { Tool, ToolSchema } from "@modelcontextprotocol/sdk/types.js";
-import { zodToJsonSchema } from "zod-to-json-schema";
+import { toJsonSchemaCompat } from "@modelcontextprotocol/sdk/server/zod-json-schema-compat.js";
 import { Logger } from "winston";
 
-const ToolInputSchema = ToolSchema.shape.inputSchema;
-type ToolInput = z.infer<typeof ToolInputSchema>;
 
 export const phonecallsListToolName = "phone-calls-list";
 export const phonecallsListToolDescription = "This method allows listing of PhoneCalls resources in particular contexts such as User, Organization or global.";
@@ -29,7 +27,7 @@ export const PhonecallsListToolSchema = z.object({
 export const PHONECALLS_LIST_TOOL: Tool = {
     name: phonecallsListToolName,
     description: phonecallsListToolDescription,
-    inputSchema: zodToJsonSchema(PhonecallsListToolSchema) as ToolInput,
+    inputSchema: toJsonSchemaCompat(PhonecallsListToolSchema, { strictUnions: true, pipeStrategy: 'input' }) as any,
 }
 
 export async function runPhonecallsListTool(

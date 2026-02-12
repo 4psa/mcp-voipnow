@@ -1,11 +1,9 @@
 import { z } from "zod";
 import * as utils from "../utils.js";
 import { Tool, ToolSchema } from "@modelcontextprotocol/sdk/types.js";
-import { zodToJsonSchema } from "zod-to-json-schema";
+import { toJsonSchemaCompat } from "@modelcontextprotocol/sdk/server/zod-json-schema-compat.js";
 import { Logger } from "winston";
 
-const ToolInputSchema = ToolSchema.shape.inputSchema;
-type ToolInput = z.infer<typeof ToolInputSchema>;
 
 const PhonecallsUpdateTransferTovoicemailCommonToolSchema = z.object({
     userId: z.string().describe("Id of the User that owns the Extension involved in the phone call. Possible values: @me,@viewer,@owner,<user_id>").default("@me"),
@@ -29,7 +27,7 @@ export const PhonecallsUpdateTransferToolSchema = PhonecallsUpdateTransferTovoic
 export const PHONECALLS_UPDATE_TRANSFER_TOOL: Tool = {
     name: phonecallsUpdateTransferToolName,
     description: phonecallsUpdateTransferToolDescription,
-    inputSchema: zodToJsonSchema(PhonecallsUpdateTransferToolSchema) as ToolInput,
+    inputSchema: toJsonSchemaCompat(PhonecallsUpdateTransferToolSchema, { strictUnions: true, pipeStrategy: 'input' }) as any,
 }
 
 export async function runPhonecallsUpdateTransferTool(
@@ -145,7 +143,7 @@ export const PhonecallsUpdateTransferTovoicemailToolSchema = PhonecallsUpdateTra
 export const PHONECALLS_UPDATE_TRANSFER_TOVOICEMAIL_TOOL: Tool = {
     name: phonecallsUpdateTransferTovoicemailToolName,
     description: phonecallsUpdateTransferTovoicemailToolDescription,
-    inputSchema: zodToJsonSchema(PhonecallsUpdateTransferTovoicemailToolSchema) as ToolInput,
+    inputSchema: toJsonSchemaCompat(PhonecallsUpdateTransferTovoicemailToolSchema, { strictUnions: true, pipeStrategy: 'input' }) as any,
 }
 
 export async function runPhonecallsUpdateTransferTovoicemailTool(

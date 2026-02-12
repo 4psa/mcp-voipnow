@@ -1,11 +1,9 @@
 import { z } from "zod";
 import * as utils from "../utils.js";
 import { Tool, ToolSchema } from "@modelcontextprotocol/sdk/types.js";
-import { zodToJsonSchema } from "zod-to-json-schema";
+import { toJsonSchemaCompat } from "@modelcontextprotocol/sdk/server/zod-json-schema-compat.js";
 import { Logger } from "winston";
 
-const ToolInputSchema = ToolSchema.shape.inputSchema;
-type ToolInput = z.infer<typeof ToolInputSchema>;
 
 const PhonecallsUpdateParkUnparkCommonToolSchema = z.object({
     userId: z.string().describe("Id of the User that owns the Extension involved in the phone call. Possible values: @me,@viewer,@owner,<user_id>").default("@me"),
@@ -29,7 +27,7 @@ export const PhonecallsUpdateParkToolSchema = PhonecallsUpdateParkUnparkCommonTo
 export const PHONECALLS_UPDATE_PARK_TOOL: Tool = {
     name: phonecallsUpdateParkToolName,
     description: phonecallsUpdateParkToolDescription,
-    inputSchema: zodToJsonSchema(PhonecallsUpdateParkToolSchema) as ToolInput,
+    inputSchema: toJsonSchemaCompat(PhonecallsUpdateParkToolSchema, { strictUnions: true, pipeStrategy: 'input' }) as any,
 }
 
 export async function runPhonecallsUpdateParkTool(
@@ -130,7 +128,7 @@ export const PhonecallsUpdateUnparkToolSchema = PhonecallsUpdateParkUnparkCommon
 export const PHONECALLS_UPDATE_UNPARK_TOOL: Tool = {
     name: phonecallsUpdateUnparkToolName,
     description: phonecallsUpdateUnparkToolDescription,
-    inputSchema: zodToJsonSchema(PhonecallsUpdateUnparkToolSchema) as ToolInput,
+    inputSchema: toJsonSchemaCompat(PhonecallsUpdateUnparkToolSchema, { strictUnions: true, pipeStrategy: 'input' }) as any,
 }
 
 export async function runPhonecallsUpdateUnparkTool(

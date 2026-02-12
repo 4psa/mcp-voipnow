@@ -1,11 +1,9 @@
 import { z } from "zod";
 import * as utils from "../utils.js";
 import { Tool, ToolSchema } from "@modelcontextprotocol/sdk/types.js";
-import { zodToJsonSchema } from "zod-to-json-schema";
+import { toJsonSchemaCompat } from "@modelcontextprotocol/sdk/server/zod-json-schema-compat.js";
 import { Logger } from "winston";
 
-const ToolInputSchema = ToolSchema.shape.inputSchema;
-type ToolInput = z.infer<typeof ToolInputSchema>;
 
 export const cdrListToolName = "cdr-list";
 export const cdrListToolDescription = "Query call history records with filtering options";
@@ -42,7 +40,7 @@ export const CDRListToolSchema = z.object({
 export const CDR_LIST_TOOL: Tool = {
     name: cdrListToolName,
     description: cdrListToolDescription,
-    inputSchema: zodToJsonSchema(CDRListToolSchema) as ToolInput,
+    inputSchema: toJsonSchemaCompat(CDRListToolSchema, { strictUnions: true, pipeStrategy: 'input' }) as any,
 }
 
 export async function runCDRListTool(

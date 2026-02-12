@@ -246,7 +246,7 @@ class ServerManager {
     // Call tool handler
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const { name, arguments: args } = request.params;
-      
+
       try {
         const handler = getToolHandler(name);
         return await handler(args, this.userAgent, this.configManager.getVoipnowConfig(), logger);
@@ -259,6 +259,31 @@ class ServerManager {
     });
   }
 
+  // Create and setup a new server instance (for multi-session support)
+  createAndSetupServer(): Server {
+    const newServer = this.createServer();
+    // Setup handlers on the new server instance
+    newServer.setRequestHandler(ListToolsRequestSchema, async () => ({
+      tools: getToolSchemas(),
+    }));
+
+    newServer.setRequestHandler(CallToolRequestSchema, async (request) => {
+      const { name, arguments: args } = request.params;
+
+      try {
+        const handler = getToolHandler(name);
+        return await handler(args, this.userAgent, this.configManager.getVoipnowConfig(), logger);
+      } catch (error) {
+        if (error instanceof Error && error.message.includes('not found in registry')) {
+          throw new Error(`Unknown tool: ${name}`);
+        }
+        throw error;
+      }
+    });
+
+    return newServer;
+  }
+
   async startServer(transport: string, port: string, address: string): Promise<void> {
     if (transport === 'sse') {
       if (await this.checkPortAvailability(parseInt(port), address)) {
@@ -266,7 +291,8 @@ class ServerManager {
       }
     } else if (transport === 'streamable-http') {
       if (await this.checkPortAvailability(parseInt(port), address)) {
-        await runHTTPStreamableServer(this.server, { port, address }, logger);
+        // Pass server factory for multi-session support
+        await runHTTPStreamableServer(() => this.createAndSetupServer(), { port, address }, logger);
       }
     } else if (transport === 'stdio') {
       await runLocalServer(this.server, logger);

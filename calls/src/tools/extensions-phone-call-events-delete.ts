@@ -1,11 +1,9 @@
 import { z } from "zod";
 import * as utils from "../utils.js";
 import { Tool, ToolSchema } from "@modelcontextprotocol/sdk/types.js";
-import { zodToJsonSchema } from "zod-to-json-schema";
+import { toJsonSchemaCompat } from "@modelcontextprotocol/sdk/server/zod-json-schema-compat.js";
 import { Logger } from "winston";
 
-const ToolInputSchema = ToolSchema.shape.inputSchema;
-type ToolInput = z.infer<typeof ToolInputSchema>;
 
 export const extensionsPhoneCallEventsDeleteToolName = "extensions-phone-call-events-delete";
 export const extensionsPhoneCallEventsDeleteToolDescription = "Allows allows deleting a phone call event in particular contexts such as User, Organization or global.";
@@ -22,7 +20,7 @@ export const ExtensionsPhoneCallEventsDeleteToolSchema = z.object({
 export const EXTENSIONS_PHONE_CALL_EVENTS_DELETE_TOOL: Tool = {
     name: extensionsPhoneCallEventsDeleteToolName,
     description: extensionsPhoneCallEventsDeleteToolDescription,
-    inputSchema: zodToJsonSchema(ExtensionsPhoneCallEventsDeleteToolSchema) as ToolInput,
+    inputSchema: toJsonSchemaCompat(ExtensionsPhoneCallEventsDeleteToolSchema, { strictUnions: true, pipeStrategy: 'input' }) as any,
 }
 
 export async function runExtensionsPhoneCallEventsDeleteTool(

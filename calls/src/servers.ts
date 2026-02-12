@@ -190,11 +190,16 @@ export async function runSSELocalServer(server: Server, options: OptionValues, l
     });
 }
 
-export async function runHTTPStreamableServer(server: Server, options: OptionValues, logger: Logger) {
+export async function runHTTPStreamableServer(serverFactory: (() => Server) | Server, options: OptionValues, logger: Logger) {
     const app = express();
     app.use(express.json());
-    // Map to store transports by session ID
+    // Map to store transports and servers by session ID
     const transports: { [sessionId: string]: StreamableHTTPServerTransport } = {};
+    const servers: { [sessionId: string]: Server } = {};
+
+    // Check if serverFactory is a function or a Server instance (for backward compatibility)
+    const isFactory = typeof serverFactory === 'function';
+    const legacyServer = !isFactory ? serverFactory as Server : null;
 
     // Health check endpoint
     app.get('/health', (req: Request, res: Response) => {
@@ -216,7 +221,7 @@ export async function runHTTPStreamableServer(server: Server, options: OptionVal
                 // Reuse existing transport
                 transport = transports[sessionId];
             } else if (!sessionId && req.method === 'POST' && isInitializeRequest(req.body)) {
-                // New initialization request
+                // New initialization request - create new server instance for this session
                 transport = new StreamableHTTPServerTransport({
                     sessionIdGenerator: () => randomUUID(),
                     onsessioninitialized: (sessionId) => {
@@ -225,18 +230,32 @@ export async function runHTTPStreamableServer(server: Server, options: OptionVal
                         transports[sessionId] = transport;
                     }
                 });
-                // Set up onclose handler to clean up transport when closed
+
+                // Create a new server instance for this session
+                const sessionServer = isFactory ? (serverFactory as () => Server)() : legacyServer!;
+
+                // Set up onclose handler to clean up transport and server when closed
                 transport.onclose = () => {
                     const sid = transport.sessionId;
                     if (sid && transports[sid]) {
                         delete transports[sid];
+                        delete servers[sid];
+                        logger.info(`Cleaned up server and transport for session ${sid}`);
                     }
                 };
+
                 // Connect the transport to the MCP server BEFORE handling the request
                 // so responses can flow back through the same transport
-                logger.info('Creating server instance');
+                logger.info('Creating server instance for new session');
                 logger.info('Connecting transport to server');
-                await server.connect(transport);
+                await sessionServer.connect(transport);
+
+                // Store the server instance
+                const sid = transport.sessionId;
+                if (sid) {
+                    servers[sid] = sessionServer;
+                }
+
                 await transport.handleRequest(req, res, req.body);
                 return; // Already handled
             } else {

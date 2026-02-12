@@ -1,11 +1,9 @@
 import { z } from "zod";
 import * as utils from "../utils.js";
 import { Tool, ToolSchema } from "@modelcontextprotocol/sdk/types.js";
-import { zodToJsonSchema } from "zod-to-json-schema";
+import { toJsonSchemaCompat } from "@modelcontextprotocol/sdk/server/zod-json-schema-compat.js";
 import { Logger } from "winston";
 
-const ToolInputSchema = ToolSchema.shape.inputSchema;
-type ToolInput = z.infer<typeof ToolInputSchema>;
 
 export const extensionsQueueAgentsUpdateToolName = "extensions-queue-agents-update";
 export const extensionsQueueAgentsUpdateToolDescription = "Query allows updating the statuses of agents that are registered to a queue in particular contexts such as User, Organization or global.";
@@ -23,7 +21,7 @@ export const ExtensionsQueueAgentsUpdateToolSchema = z.object({
 export const EXTENSIONS_QUEUE_AGENTS_UPDATE_TOOL: Tool = {
     name: extensionsQueueAgentsUpdateToolName,
     description: extensionsQueueAgentsUpdateToolDescription,
-    inputSchema: zodToJsonSchema(ExtensionsQueueAgentsUpdateToolSchema) as ToolInput,
+    inputSchema: toJsonSchemaCompat(ExtensionsQueueAgentsUpdateToolSchema, { strictUnions: true, pipeStrategy: 'input' }) as any,
 }
 
 export async function runExtensionsQueueAgentsUpdateTool(
