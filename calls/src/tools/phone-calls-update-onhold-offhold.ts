@@ -29,7 +29,7 @@ export const PHONECALLS_UPDATE_ONHOLD_OFFHOLD_TOOL: Tool = {
 export async function runPhonecallsUpdateOnholdOffholdTool(
     args: z.infer<typeof PhonecallsUpdateOnholdOffholdToolSchema>,
     userAgent: string,
-    config: { voipnowUrl: string; voipnowToken: string; },
+    config: { voipnowUrl: string; voipnowToken: string; agent?: any; },
     logger: Logger,
 ) {
     const { userId, extension, phoneCallId, action, phoneCallViewId } = PhonecallsUpdateOnholdOffholdToolSchema.parse(args);
@@ -61,7 +61,7 @@ export async function runPhonecallsUpdateOnholdOffholdTool(
 
         logger.debug(`Updating phone call with ${action} for ${config.voipnowUrl}/uapi/phoneCalls/${paramsPhoneUpdateOnholdOffholdCallURL}`);
         logger.debug(`Payload: ${JSON.stringify(payload)}`);
-        const response = await fetch(utils.createUrl(`${config.voipnowUrl}`, `/uapi/phoneCalls/${paramsPhoneUpdateOnholdOffholdCallURL}`), {
+        const response = await utils.secureAwareFetch(utils.createUrl(`${config.voipnowUrl}`, `/uapi/phoneCalls/${paramsPhoneUpdateOnholdOffholdCallURL}`), {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -69,7 +69,8 @@ export async function runPhonecallsUpdateOnholdOffholdTool(
                 'Authorization': `Bearer ${config.voipnowToken}`
             },
             body: JSON.stringify(payload),
-            redirect: 'manual' // Prevent automatic redirection
+            redirect: 'manual', // Prevent automatic redirection
+            ...(config.agent && { agent: config.agent }),
         });
 
         // Handle non-2xx responses

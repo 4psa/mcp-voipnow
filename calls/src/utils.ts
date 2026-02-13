@@ -5,6 +5,7 @@ import { logger, logError } from './logger.js'
 import { generateToken, checkToken, checkConfigChange } from './token/utils.js'
 import fs from 'fs'
 import net from 'net'
+import nodeFetch from 'node-fetch'
 
 // Validation constants
 const VALIDATION_LIMITS = {
@@ -392,4 +393,17 @@ export function sanitizeApiError(
     error: userMessage,
     status: response.status
   };
+}
+
+/**
+ * Custom fetch wrapper that supports HTTPS agent for insecure SSL mode
+ * Uses node-fetch when an agent is provided, otherwise uses native fetch
+ */
+export async function secureAwareFetch(url: string, options: any = {}): Promise<any> {
+  // If an agent is provided, use node-fetch which supports it
+  if (options.agent) {
+    return nodeFetch(url, options);
+  }
+  // Otherwise use native fetch
+  return fetch(url, options);
 }

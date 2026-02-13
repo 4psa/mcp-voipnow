@@ -32,7 +32,7 @@ export const PHONECALLS_UPDATE_MONITOR_TOOL: Tool = {
 export async function runPhonecallsUpdateMonitorTool(
     args: z.infer<typeof PhonecallsUpdateMonitorToolSchema>,
     userAgent: string,
-    config: { voipnowUrl: string; voipnowToken: string; },
+    config: { voipnowUrl: string; voipnowToken: string; agent?: any; },
     logger: Logger,
 ) {
     const { userId, extension, phoneCallId, action, sendCallTo, callerId, waitForPickup, phoneCallViewId } = PhonecallsUpdateMonitorToolSchema.parse(args);
@@ -80,7 +80,7 @@ export async function runPhonecallsUpdateMonitorTool(
 
         logger.debug(`Updating phone call with ${action} for ${config.voipnowUrl}/uapi/phoneCalls/${paramsPhoneUpdateMonitorCallURL}`);
         logger.debug(`Payload: ${JSON.stringify(payload)}`);
-        const response = await fetch(utils.createUrl(`${config.voipnowUrl}`, `/uapi/phoneCalls/${paramsPhoneUpdateMonitorCallURL}`), {
+        const response = await utils.secureAwareFetch(utils.createUrl(`${config.voipnowUrl}`, `/uapi/phoneCalls/${paramsPhoneUpdateMonitorCallURL}`), {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -88,7 +88,8 @@ export async function runPhonecallsUpdateMonitorTool(
                 'Authorization': `Bearer ${config.voipnowToken}`
             },
             body: JSON.stringify(payload),
-            redirect: 'manual' // Prevent automatic redirection
+            redirect: 'manual', // Prevent automatic redirection
+            ...(config.agent && { agent: config.agent }),
         });
 
         // Handle non-2xx responses

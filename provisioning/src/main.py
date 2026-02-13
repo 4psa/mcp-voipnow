@@ -153,6 +153,10 @@ class ConfigManager:
                         utils.logger.log_warning(self.logger, "Skipping config reload due to missing voipnowTokenFile.")
                         return  # Skip updating config
 
+                # Normalize insecure flag to boolean
+                if "insecure" in new_config_mcp:
+                    new_config_mcp["insecure"] = new_config_mcp["insecure"] is True or new_config_mcp["insecure"] == "true"
+
                 # Update main config data
                 self.config_data = new_config_mcp
 

@@ -46,7 +46,7 @@ export const CDR_LIST_TOOL: Tool = {
 export async function runCDRListTool(
     args: z.infer<typeof CDRListToolSchema>,
     userAgent: string,
-    config: { voipnowUrl: string; voipnowToken: string; },
+    config: { voipnowUrl: string; voipnowToken: string; agent?: any; },
     logger: Logger,
 ) {
     const { ownerId, count, filterBy, filterValue, source, destination, startDate, endDate, saveStartDate, saveEndDate, disposition, flow, fields, startIndex, sortOrder } = CDRListToolSchema.parse(args);
@@ -100,14 +100,15 @@ export async function runCDRListTool(
         }
 
         logger.debug(`Fetching phone call records info from ${config.voipnowUrl}/uapi/cdr/${paramsCallHistoryURL}`);
-        const response = await fetch(utils.createUrl(`${config.voipnowUrl}`, `/uapi/cdr/${paramsCallHistoryURL}`), {
+        const response = await utils.secureAwareFetch(utils.createUrl(`${config.voipnowUrl}`, `/uapi/cdr/${paramsCallHistoryURL}`), {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
                 'User-Agent': userAgent.toString(),
                 'Authorization': `Bearer ${config.voipnowToken}`
             },
-            redirect: 'manual' // Prevent automatic redirection
+            redirect: 'manual', // Prevent automatic redirection
+            ...(config.agent && { agent: config.agent }),
         });
 
         // Handle non-2xx responses

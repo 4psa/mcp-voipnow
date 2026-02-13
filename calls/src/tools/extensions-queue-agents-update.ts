@@ -27,7 +27,7 @@ export const EXTENSIONS_QUEUE_AGENTS_UPDATE_TOOL: Tool = {
 export async function runExtensionsQueueAgentsUpdateTool(
     args: z.infer<typeof ExtensionsQueueAgentsUpdateToolSchema>,
     userAgent: string,
-    config: { voipnowUrl: string; voipnowToken: string; },
+    config: { voipnowUrl: string; voipnowToken: string; agent?: any; },
     logger: Logger,
 ) {
     const { userId, extension, agent, status } = ExtensionsQueueAgentsUpdateToolSchema.parse(args);
@@ -72,7 +72,7 @@ export async function runExtensionsQueueAgentsUpdateTool(
 
         logger.debug(`Updating extensions queue agent with ${status} for ${config.voipnowUrl}/uapi/extensions/${paramsExtensionsQueueAgentsUpdateURL}`);
         logger.debug(`Payload: ${JSON.stringify(payload)}`);
-        const response = await fetch(utils.createUrl(config.voipnowUrl, `/uapi/extensions/${paramsExtensionsQueueAgentsUpdateURL}`), {
+        const response = await utils.secureAwareFetch(utils.createUrl(config.voipnowUrl, `/uapi/extensions/${paramsExtensionsQueueAgentsUpdateURL}`), {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -80,7 +80,8 @@ export async function runExtensionsQueueAgentsUpdateTool(
                 "Authorization": `Bearer ${config.voipnowToken}`,
             },
             body: JSON.stringify(payload),
-            redirect: 'manual' // Prevent automatic redirection
+            redirect: 'manual', // Prevent automatic redirection
+            ...(config.agent && { agent: config.agent }),
         });
 
         // Handle non-2xx responses

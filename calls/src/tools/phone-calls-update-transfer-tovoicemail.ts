@@ -33,7 +33,7 @@ export const PHONECALLS_UPDATE_TRANSFER_TOOL: Tool = {
 export async function runPhonecallsUpdateTransferTool(
     args: z.infer<typeof PhonecallsUpdateTransferToolSchema>,
     userAgent: string,
-    config: { voipnowUrl: string; voipnowToken: string; },
+    config: { voipnowUrl: string; voipnowToken: string; agent?: any; },
     logger: Logger,
 ) {
     const { userId, extension, phoneCallId, action, sendCallTo, transferFromNumber, transferNumber } = PhonecallsUpdateTransferToolSchema.parse(args);
@@ -83,7 +83,7 @@ export async function runPhonecallsUpdateTransferTool(
         
         logger.debug(`Updating phone call with ${action} for ${config.voipnowUrl}/uapi/phoneCalls/${paramsPhoneUpdateTransferCallURL}`);
         logger.debug(`Payload: ${JSON.stringify(payload)}`);
-        const response = await fetch(utils.createUrl(`${config.voipnowUrl}`, `/uapi/phoneCalls/${paramsPhoneUpdateTransferCallURL}`), {
+        const response = await utils.secureAwareFetch(utils.createUrl(`${config.voipnowUrl}`, `/uapi/phoneCalls/${paramsPhoneUpdateTransferCallURL}`), {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -91,7 +91,8 @@ export async function runPhonecallsUpdateTransferTool(
                 'Authorization': `Bearer ${config.voipnowToken}`
             },
             body: JSON.stringify(payload),
-            redirect: 'manual' // Prevent automatic redirection
+            redirect: 'manual', // Prevent automatic redirection
+            ...(config.agent && { agent: config.agent }),
         });
 
         // Handle non-2xx responses
@@ -149,7 +150,7 @@ export const PHONECALLS_UPDATE_TRANSFER_TOVOICEMAIL_TOOL: Tool = {
 export async function runPhonecallsUpdateTransferTovoicemailTool(
     args: z.infer<typeof PhonecallsUpdateTransferTovoicemailToolSchema>,
     userAgent: string,
-    config: { voipnowUrl: string; voipnowToken: string; },
+    config: { voipnowUrl: string; voipnowToken: string; agent?: any; },
     logger: Logger,
 ) {
     const { userId, extension, phoneCallId, action, sendCallTo, transferFromNumber, transferNumber } = PhonecallsUpdateTransferTovoicemailToolSchema.parse(args);
@@ -199,7 +200,7 @@ export async function runPhonecallsUpdateTransferTovoicemailTool(
 
         logger.debug(`Updating phone call with ${action} for ${config.voipnowUrl}/uapi/phoneCalls/${paramsPhoneUpdateTransferTovoicemailCallURL}`);
         logger.debug(`Payload: ${JSON.stringify(payload)}`);
-        const response = await fetch(utils.createUrl(`${config.voipnowUrl}`, `/uapi/phoneCalls/${paramsPhoneUpdateTransferTovoicemailCallURL}`), {
+        const response = await utils.secureAwareFetch(utils.createUrl(`${config.voipnowUrl}`, `/uapi/phoneCalls/${paramsPhoneUpdateTransferTovoicemailCallURL}`), {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -207,7 +208,8 @@ export async function runPhonecallsUpdateTransferTovoicemailTool(
                 'Authorization': `Bearer ${config.voipnowToken}`
             },
             body: JSON.stringify(payload),
-            redirect: 'manual' // Prevent automatic redirection
+            redirect: 'manual', // Prevent automatic redirection
+            ...(config.agent && { agent: config.agent }),
         });
 
         // Handle non-2xx responses

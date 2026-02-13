@@ -216,7 +216,8 @@ Get VoipNow Calls MCP running and verified quickly.
   "appSecret": "your-app-secret",
   "voipnowHost": "https://your-voipnow-host.com",
   "voipnowTokenFile": "/abs/path/to/calls/.access_token",
-  "logLevel": "info"
+  "logLevel": "info",
+  "insecure": false
 }
 ```
 
@@ -259,7 +260,8 @@ Create a `config.json` file with your VoipNow credentials:
   "voipnowHost": "https://your-voipnow-host.com",
   "voipnowTokenFile": "/path/to/.access_token",
   "authTokenMCP": "your-mcp-auth-token",
-  "logLevel": "info"
+  "logLevel": "info",
+  "insecure": false
 }
 
 ```
@@ -273,6 +275,7 @@ Create a `config.json` file with your VoipNow credentials:
 | `voipnowTokenFile` | yes      | File path to store/read access token                  |
 | `authTokenMCP`     | depends  | Auth token for MCP (required when `--secure` is used) |
 | `logLevel`         | no       | Logging level: `debug`, `info`, `warning`, `error`    |
+| `insecure`         | no       | Disable SSL verification (default: `false`). **NOT for production!** |
 
 > [!NOTE]
 > **Auto-reload**: The server automatically reloads its configuration when `config.json` or the token file is modified.
@@ -291,7 +294,7 @@ node dist/index.js --transport streamable-http --address 0.0.0.0 --port 3000 --s
 ```
 
 > [!CAUTION]
-> TLS certificates: This server does not allow bypassing TLS verification. Make sure your `voipnowHost` is configured with a valid certificate. For development with self-signed instances, you can terminate TLS through a trusted proxy or add the CA to your system trust store. Do not disable TLS verification globally.
+> **TLS Certificate Verification:** By default, the server requires valid SSL/TLS certificates when connecting to VoipNow. For development/testing with self-signed certificates, you can disable verification by setting `"insecure": true` in `config.json`. **This is NOT recommended for production** as it exposes you to man-in-the-middle attacks. For production, use valid certificates or terminate TLS through a trusted proxy.
 
 ---
 
@@ -345,7 +348,8 @@ Navigate to your VoipNow Calls MCP server directory and create/update `config.js
   "voipnowHost": "https://your-voipnow-host.com",
   "voipnowTokenFile": "/path/to/calls/.access_token",
   "authTokenMCP": "your-mcp-auth-token",
-  "logLevel": "info"
+  "logLevel": "info",
+  "insecure": false
 }
 ```
 
@@ -358,7 +362,8 @@ Navigate to your VoipNow Calls MCP server directory and create/update `config.js
   "voipnowHost": "https://your-voipnow-host.com",
   "voipnowTokenFile": "/home/user/mcp/calls/.access_token",
   "authTokenMCP": "KoMMbqUHaYXtBxh7XuJF09SZs",
-  "logLevel": "info"
+  "logLevel": "info",
+  "insecure": false
 }
 ```
 
@@ -440,7 +445,8 @@ The VoipNow Calls MCP server supports containerization for isolated deployments 
      "voipnowHost": "https://your-voipnow-host.com",
      "voipnowTokenFile": "/app/.access_token",
      "authTokenMCP": "your-mcp-auth-token",
-     "logLevel": "info"
+     "logLevel": "info",
+  "insecure": false
    }
    EOF
    ```

@@ -30,7 +30,7 @@ export const EXTENSIONS_PHONE_CALL_EVENTS_CREATE_TOOL: Tool = {
 export async function runExtensionsPhoneCallEventsCreateTool(
     args: z.infer<typeof ExtensionsPhoneCallEventsCreateToolSchema>,
     userAgent: string,
-    config: { voipnowUrl: string; voipnowToken: string; },
+    config: { voipnowUrl: string; voipnowToken: string; agent?: any; },
     logger: Logger,
 ) {
     const { userId, extension, type, method, note, url, status } = ExtensionsPhoneCallEventsCreateToolSchema.parse(args);
@@ -68,7 +68,7 @@ export async function runExtensionsPhoneCallEventsCreateTool(
 
         logger.debug(`Creating phone call event for ${config.voipnowUrl}/uapi/extensions/${paramsExtensionsPhoneCallEventsCreateURL}`);
         logger.debug(`Payload: ${JSON.stringify(payload)}`);
-        const response = await fetch(utils.createUrl(config.voipnowUrl, `/uapi/extensions/${paramsExtensionsPhoneCallEventsCreateURL}`), {
+        const response = await utils.secureAwareFetch(utils.createUrl(config.voipnowUrl, `/uapi/extensions/${paramsExtensionsPhoneCallEventsCreateURL}`), {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -76,7 +76,8 @@ export async function runExtensionsPhoneCallEventsCreateTool(
                 "User-Agent": userAgent.toString(),
             },
             body: JSON.stringify(payload),
-            redirect: 'manual' // Prevent automatic redirection
+            redirect: 'manual', // Prevent automatic redirection
+            ...(config.agent && { agent: config.agent }),
         });
 
         // Handle non-2xx responses

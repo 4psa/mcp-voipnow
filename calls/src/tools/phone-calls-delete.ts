@@ -27,7 +27,7 @@ export const PHONECALLS_DELETE_TOOL: Tool = {
 export async function runPhonecallsDeleteTool(
     args: z.infer<typeof PhonecallsDeleteToolSchema>,
     userAgent: string,
-    config: { voipnowUrl: string; voipnowToken: string; },
+    config: { voipnowUrl: string; voipnowToken: string; agent?: any; },
     logger: Logger,
 ) {
     const { userId, extension, phoneCallId, phoneNumber } = PhonecallsDeleteToolSchema.parse(args);
@@ -80,14 +80,15 @@ export async function runPhonecallsDeleteTool(
         }
 
         logger.debug(`Deleting phone call from ${config.voipnowUrl}/uapi/phoneCalls/${paramsPhoneDeleteCallURL}`);
-        const response = await fetch(utils.createUrl(`${config.voipnowUrl}`, `/uapi/phoneCalls/${paramsPhoneDeleteCallURL}`), {
+        const response = await utils.secureAwareFetch(utils.createUrl(`${config.voipnowUrl}`, `/uapi/phoneCalls/${paramsPhoneDeleteCallURL}`), {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
                 'User-Agent': userAgent.toString(),
                 'Authorization': `Bearer ${config.voipnowToken}`
             },
-            redirect: 'manual' // Prevent automatic redirection
+            redirect: 'manual', // Prevent automatic redirection
+            ...(config.agent && { agent: config.agent }),
         });
 
         // Handle non-2xx responses

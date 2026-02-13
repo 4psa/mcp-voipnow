@@ -32,7 +32,7 @@ export const PHONECALLS_UPDATE_PICKUP_BARGEIN_TOOL: Tool = {
 export async function runPhonecallsUpdatePickupBargeinTool(
     args: z.infer<typeof PhonecallsUpdatePickupBargeinToolSchema>,
     userAgent: string,
-    config: { voipnowUrl: string; voipnowToken: string; },
+    config: { voipnowUrl: string; voipnowToken: string; agent?: any; },
     logger: Logger,
 ) {
     const { userId, extension, phoneCallId, action, phoneCallViewId, sendCallTo, callerId, waitForPickup } = PhonecallsUpdatePickupBargeinToolSchema.parse(args);
@@ -80,7 +80,7 @@ export async function runPhonecallsUpdatePickupBargeinTool(
 
         logger.debug(`Updating phone call with ${action} for ${config.voipnowUrl}/uapi/phoneCalls/${paramsPhoneUpdatePickupBargeinCallURL}`);
         logger.debug(`Payload: ${JSON.stringify(payload)}`);
-        const response = await fetch(utils.createUrl(`${config.voipnowUrl}`, `/uapi/phoneCalls/${paramsPhoneUpdatePickupBargeinCallURL}`), {
+        const response = await utils.secureAwareFetch(utils.createUrl(`${config.voipnowUrl}`, `/uapi/phoneCalls/${paramsPhoneUpdatePickupBargeinCallURL}`), {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -88,7 +88,8 @@ export async function runPhonecallsUpdatePickupBargeinTool(
                 'Authorization': `Bearer ${config.voipnowToken}`
             },
             body: JSON.stringify(payload),
-            redirect: 'manual' // Prevent automatic redirection
+            redirect: 'manual', // Prevent automatic redirection
+            ...(config.agent && { agent: config.agent }),
         });
 
         // Handle non-2xx responses

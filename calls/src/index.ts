@@ -3,6 +3,7 @@ import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprot
 import { Command } from 'commander'
 import fs from 'fs'
 import path from 'path'
+import https from 'https'
 import chokidar, { FSWatcher } from 'chokidar'
 import { createRequire } from 'module'
 
@@ -19,6 +20,7 @@ import * as utils from "./utils.js";
 interface VoipnowConfig {
   voipnowUrl: string;
   voipnowToken: string;
+  agent?: https.Agent;
 }
 
 interface MCPConfig {
@@ -53,7 +55,14 @@ class ConfigurationManager {
     if (!fs.existsSync(this.configPath)) {
       throw new Error(`Config file ${this.configPath} does not exist`);
     }
-    return JSON.parse(fs.readFileSync(this.configPath, 'utf8'));
+    const config = JSON.parse(fs.readFileSync(this.configPath, 'utf8'));
+
+    // Normalize insecure flag to boolean
+    if (config.insecure !== undefined) {
+      config.insecure = config.insecure === true || config.insecure === 'true';
+    }
+
+    return config;
   }
 
   private extractTokenFromFile(tokenFile: string): string {
@@ -111,22 +120,33 @@ class ConfigurationManager {
       await generateToken(this.mcpConfig);
     }
 
+    // Create HTTPS agent if insecure mode is enabled
+    let agent: https.Agent | undefined;
+    if (this.mcpConfig.insecure === true) {
+      logger.warning('INSECURE MODE: SSL certificate verification is DISABLED. This is NOT RECOMMENDED for production!');
+      agent = new https.Agent({
+        rejectUnauthorized: false
+      });
+    }
+
     try {
       const token = this.extractTokenFromFile(this.mcpConfig.voipnowTokenFile);
       return {
         voipnowUrl: this.mcpConfig.voipnowHost,
         voipnowToken: token,
+        agent,
       };
     } catch (error: any) {
       // If token extraction fails, try to regenerate and retry once
       logger.warning(`Failed to extract token (${error.message}), regenerating...`);
       await generateToken(this.mcpConfig);
-      
+
       // Retry extraction after regeneration
       const token = this.extractTokenFromFile(this.mcpConfig.voipnowTokenFile);
       return {
         voipnowUrl: this.mcpConfig.voipnowHost,
         voipnowToken: token,
+        agent,
       };
     }
   }
@@ -284,15 +304,15 @@ class ServerManager {
     return newServer;
   }
 
-  async startServer(transport: string, port: string, address: string): Promise<void> {
+  async startServer(transport: string, port: string, address: string, secure: boolean, config: string): Promise<void> {
     if (transport === 'sse') {
       if (await this.checkPortAvailability(parseInt(port), address)) {
-        await runSSELocalServer(this.server, { port, address }, logger);
+        await runSSELocalServer(this.server, { port, address, secure, config }, logger);
       }
     } else if (transport === 'streamable-http') {
       if (await this.checkPortAvailability(parseInt(port), address)) {
         // Pass server factory for multi-session support
-        await runHTTPStreamableServer(() => this.createAndSetupServer(), { port, address }, logger);
+        await runHTTPStreamableServer(() => this.createAndSetupServer(), { port, address, secure, config }, logger);
       }
     } else if (transport === 'stdio') {
       await runLocalServer(this.server, logger);
@@ -446,7 +466,7 @@ async function main(): Promise<void> {
     });
 
     // Start the MCP server
-    await serverManager.startServer(options.transport, options.port, options.address);
+    await serverManager.startServer(options.transport, options.port, options.address, options.secure, options.config);
 
   } catch (error) {
     logError('Fatal error in main application:', error);

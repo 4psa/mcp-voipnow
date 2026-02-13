@@ -32,7 +32,7 @@ export const EXTENSIONS_PRESENCE_LIST_TOOL: Tool = {
 export async function runExtensionsPresenceListTool(
     args: z.infer<typeof ExtensionsPresenceListToolSchema>,
     userAgent: string,
-    config: { voipnowUrl: string; voipnowToken: string; },
+    config: { voipnowUrl: string; voipnowToken: string; agent?: any; },
     logger: Logger,
 ) {
     const {  userId, extension, count, filterBy, filterOp, filterValue, startIndex, fields, sortOrder } = ExtensionsPresenceListToolSchema.parse(args);
@@ -90,14 +90,15 @@ export async function runExtensionsPresenceListTool(
         }
 
         logger.debug(`Listing extensions presence for ${config.voipnowUrl}/uapi/extensions/${paramsExtensionsPresenceURL}`);
-        const response = await fetch(utils.createUrl(`${config.voipnowUrl}`, `/uapi/extensions/${paramsExtensionsPresenceURL}`), {
+        const response = await utils.secureAwareFetch(utils.createUrl(`${config.voipnowUrl}`, `/uapi/extensions/${paramsExtensionsPresenceURL}`), {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
                 "User-Agent": userAgent.toString(),
                 "Authorization": `Bearer ${config.voipnowToken}`,
             },
-            redirect: 'manual' // Prevent automatic redirection
+            redirect: 'manual', // Prevent automatic redirection
+            ...(config.agent && { agent: config.agent }),
         });
 
         // Handle non-2xx responses

@@ -38,7 +38,7 @@ export const PHONECALLS_CREATE_TOOL: Tool = {
 export async function runPhonecallsCreateTool(
     args: z.infer<typeof PhonecallsCreateToolSchema>,
     userAgent: string,
-    config: { voipnowUrl: string; voipnowToken: string; },
+    config: { voipnowUrl: string; voipnowToken: string; agent?: any; },
     logger: Logger,
 ) {
     const { type, userId, waitForPickup, callDuration, allowPublicTransfer, video, number, pin, extension, source, destination, callerId, callerDestination, nonce } = PhonecallsCreateToolSchema.parse(args);
@@ -156,7 +156,7 @@ export async function runPhonecallsCreateTool(
 
         logger.debug(`Creating ${type} type call from ${config.voipnowUrl}/uapi/phoneCalls/${paramsPhoneCreateCallURL}`);
         logger.debug(`Payload: ${JSON.stringify(payload)}`);
-        const response = await fetch(utils.createUrl(`${config.voipnowUrl}`, `/uapi/phoneCalls/${paramsPhoneCreateCallURL}`), {
+        const response = await utils.secureAwareFetch(utils.createUrl(`${config.voipnowUrl}`, `/uapi/phoneCalls/${paramsPhoneCreateCallURL}`), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -164,7 +164,8 @@ export async function runPhonecallsCreateTool(
                 'Authorization': `Bearer ${config.voipnowToken}`
             },
             body: JSON.stringify(payload),
-            redirect: 'manual' // Prevent automatic redirection
+            redirect: 'manual', // Prevent automatic redirection
+            ...(config.agent && { agent: config.agent }),
         });
 
         // Handle non-2xx responses

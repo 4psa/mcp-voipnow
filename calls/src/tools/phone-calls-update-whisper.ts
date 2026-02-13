@@ -33,7 +33,7 @@ export const PHONECALLS_UPDATE_WHISPER_TOOL: Tool = {
 export async function runPhonecallsUpdateWhisperTool(
     args: z.infer<typeof PhonecallsUpdateWhisperToolSchema>,
     userAgent: string,
-    config: { voipnowUrl: string; voipnowToken: string; },
+    config: { voipnowUrl: string; voipnowToken: string; agent?: any; },
     logger: Logger,
 ) {
     const { userId, extension, phoneCallId, action, sendCallTo, callerId, waitForPickup, phoneCallViewId, privateW } = PhonecallsUpdateWhisperToolSchema.parse(args);
@@ -82,7 +82,7 @@ export async function runPhonecallsUpdateWhisperTool(
 
         logger.debug(`Updating phone call with ${action} for ${config.voipnowUrl}/uapi/phoneCalls/${paramsPhoneUpdateWhisperCallURL}`);
         logger.debug(`Payload: ${JSON.stringify(payload)}`);
-        const response = await fetch(utils.createUrl(`${config.voipnowUrl}`, `/uapi/phoneCalls/${paramsPhoneUpdateWhisperCallURL}`), {
+        const response = await utils.secureAwareFetch(utils.createUrl(`${config.voipnowUrl}`, `/uapi/phoneCalls/${paramsPhoneUpdateWhisperCallURL}`), {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -90,7 +90,8 @@ export async function runPhonecallsUpdateWhisperTool(
                 'Authorization': `Bearer ${config.voipnowToken}`
             },
             body: JSON.stringify(payload),
-            redirect: 'manual' // Prevent automatic redirection
+            redirect: 'manual', // Prevent automatic redirection
+            ...(config.agent && { agent: config.agent }),
         });
 
         // Handle non-2xx responses

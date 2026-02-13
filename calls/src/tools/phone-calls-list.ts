@@ -33,7 +33,7 @@ export const PHONECALLS_LIST_TOOL: Tool = {
 export async function runPhonecallsListTool(
     args: z.infer<typeof PhonecallsListToolSchema>,
     userAgent: string,
-    config: { voipnowUrl: string; voipnowToken: string; },
+    config: { voipnowUrl: string; voipnowToken: string; agent?: any; },
     logger: Logger,
 ) {
     const { userId, extension, phoneCallId, count, filterBy, filterOp, filterValue, startIndex, fields, sortOrder } = PhonecallsListToolSchema.parse(args);
@@ -91,14 +91,15 @@ export async function runPhonecallsListTool(
         }
 
         logger.debug(`Listing phone calls from ${config.voipnowUrl}/uapi/phoneCalls/${paramsPhoneListCallURL}`);
-        const response = await fetch(utils.createUrl(`${config.voipnowUrl}`, `/uapi/phoneCalls/${paramsPhoneListCallURL}`), {
+        const response = await utils.secureAwareFetch(utils.createUrl(`${config.voipnowUrl}`, `/uapi/phoneCalls/${paramsPhoneListCallURL}`), {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
                 'User-Agent': userAgent.toString(),
                 'Authorization': `Bearer ${config.voipnowToken}`
             },
-            redirect: 'manual' // Prevent automatic redirection
+            redirect: 'manual', // Prevent automatic redirection
+            ...(config.agent && { agent: config.agent }),
         });
 
         // Handle non-2xx responses

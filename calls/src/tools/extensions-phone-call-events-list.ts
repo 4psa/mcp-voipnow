@@ -33,7 +33,7 @@ export const EXTENSIONS_PHONE_CALL_EVENTS_LIST_TOOL: Tool = {
 export async function runExtensionsPhoneCallEventsListTool(
     args: z.infer<typeof ExtensionsPhoneCallEventsListToolSchema>,
     userAgent: string,
-    config: { voipnowUrl: string; voipnowToken: string; },
+    config: { voipnowUrl: string; voipnowToken: string; agent?: any; },
     logger: Logger,
 ) {
     const { userId, extension, eventType, eventID, count, filterBy, filterValue, startIndex, fields, sortOrder } = ExtensionsPhoneCallEventsListToolSchema.parse(args);
@@ -99,14 +99,15 @@ export async function runExtensionsPhoneCallEventsListTool(
         }
 
         logger.debug(`Listing phone call events for ${config.voipnowUrl}/uapi/extensions/${paramsExtensionsPhoneCallEventsListURL}`);
-        const response = await fetch(utils.createUrl(`${config.voipnowUrl}`, `/uapi/extensions/${paramsExtensionsPhoneCallEventsListURL}`), {
+        const response = await utils.secureAwareFetch(utils.createUrl(`${config.voipnowUrl}`, `/uapi/extensions/${paramsExtensionsPhoneCallEventsListURL}`), {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
                 "User-Agent": userAgent.toString(),
                 "Authorization": `Bearer ${config.voipnowToken}`,
             },
-            redirect: 'manual' // Prevent automatic redirection
+            redirect: 'manual', // Prevent automatic redirection
+            ...(config.agent && { agent: config.agent }),
         });
 
         // Handle non-2xx responses

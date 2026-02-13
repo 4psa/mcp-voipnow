@@ -29,7 +29,7 @@ export const FAXES_CREATE_TOOL: Tool = {
 export async function runFaxesCreateTool(
     args: z.infer<typeof FaxesCreateToolSchema>,
     userAgent: string,
-    config: { voipnowUrl: string; voipnowToken: string; },
+    config: { voipnowUrl: string; voipnowToken: string; agent?: any; },
     logger: Logger,
 ) {
     const { userId, extension, recipients, filePath } = FaxesCreateToolSchema.parse(args);
@@ -83,14 +83,15 @@ export async function runFaxesCreateTool(
         logger.debug(`FormData fields: ${Array.from(formData.keys()).join(', ')}`);
         logger.debug(`Recipients: ${JSON.stringify(recipients)}`);
         logger.debug(`File: ${fileName} (${fileBuffer.length} bytes)`);
-        const response = await fetch(utils.createUrl(config.voipnowUrl, `/uapi/faxes/${paramsFaxesCreateURL}`), {
+        const response = await utils.secureAwareFetch(utils.createUrl(config.voipnowUrl, `/uapi/faxes/${paramsFaxesCreateURL}`), {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${config.voipnowToken}`,
                 "User-Agent": userAgent.toString(),
             },
             body: formData,
-            redirect: 'manual' // Prevent automatic redirection
+            redirect: 'manual', // Prevent automatic redirection
+            ...(config.agent && { agent: config.agent }),
         });
 
         // Handle non-2xx responses

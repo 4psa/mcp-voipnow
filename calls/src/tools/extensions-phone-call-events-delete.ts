@@ -26,7 +26,7 @@ export const EXTENSIONS_PHONE_CALL_EVENTS_DELETE_TOOL: Tool = {
 export async function runExtensionsPhoneCallEventsDeleteTool(
     args: z.infer<typeof ExtensionsPhoneCallEventsDeleteToolSchema>,
     userAgent: string,
-    config: { voipnowUrl: string; voipnowToken: string; },
+    config: { voipnowUrl: string; voipnowToken: string; agent?: any; },
     logger: Logger,
 ) {
     const { userId, extension, eventType, eventID } = ExtensionsPhoneCallEventsDeleteToolSchema.parse(args);
@@ -59,14 +59,15 @@ export async function runExtensionsPhoneCallEventsDeleteTool(
         );
 
         logger.debug(`Deleting phone call events for ${config.voipnowUrl}/uapi/extensions/${paramsExtensionsPhoneCallEventsDeleteURL}`);
-        const response = await fetch(utils.createUrl(`${config.voipnowUrl}`, `/uapi/extensions/${paramsExtensionsPhoneCallEventsDeleteURL}`), {
+        const response = await utils.secureAwareFetch(utils.createUrl(`${config.voipnowUrl}`, `/uapi/extensions/${paramsExtensionsPhoneCallEventsDeleteURL}`), {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
                 "User-Agent": userAgent.toString(),
                 "Authorization": `Bearer ${config.voipnowToken}`,
             },
-            redirect: 'manual' // Prevent automatic redirection
+            redirect: 'manual', // Prevent automatic redirection
+            ...(config.agent && { agent: config.agent }),
         });
 
         // Handle non-2xx responses

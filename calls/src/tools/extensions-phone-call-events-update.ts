@@ -32,7 +32,7 @@ export const EXTENSIONS_PHONE_CALL_EVENTS_UPDATE_TOOL: Tool = {
 export async function runExtensionsPhoneCallEventsUpdateTool(
     args: z.infer<typeof ExtensionsPhoneCallEventsUpdateToolSchema>,
     userAgent: string,
-    config: { voipnowUrl: string; voipnowToken: string; },
+    config: { voipnowUrl: string; voipnowToken: string; agent?: any; },
     logger: Logger,
 ) {
     const { userId, extension, eventType, eventID, method, note, url, status } = ExtensionsPhoneCallEventsUpdateToolSchema.parse(args);
@@ -69,7 +69,7 @@ export async function runExtensionsPhoneCallEventsUpdateTool(
 
         logger.debug(`Updating phone call events for ${config.voipnowUrl}/uapi/extensions/${paramsExtensionsPhoneCallEventsDeleteURL}`);
         logger.debug(`Payload: ${JSON.stringify(payload)}`);
-        const response = await fetch(utils.createUrl(`${config.voipnowUrl}`, `/uapi/extensions/${paramsExtensionsPhoneCallEventsDeleteURL}`), {
+        const response = await utils.secureAwareFetch(utils.createUrl(`${config.voipnowUrl}`, `/uapi/extensions/${paramsExtensionsPhoneCallEventsDeleteURL}`), {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -77,7 +77,8 @@ export async function runExtensionsPhoneCallEventsUpdateTool(
                 "Authorization": `Bearer ${config.voipnowToken}`,
             },
             body: JSON.stringify(payload),
-            redirect: 'manual' // Prevent automatic redirection
+            redirect: 'manual', // Prevent automatic redirection
+            ...(config.agent && { agent: config.agent }),
         });
 
         // Handle non-2xx responses

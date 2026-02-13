@@ -84,7 +84,15 @@ def generate_token(config_mcp: dict):
         "type": "unifiedapi",
         "redirect_uri": f"{voipnow_host}/oauth/token.php",
     }
-    
+
+    # Configure SSL verification based on insecure flag
+    verify_ssl = not config_mcp.get("insecure", False)
+
+    # Disable SSL warnings if in insecure mode
+    if config_mcp.get("insecure", False):
+        import urllib3
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
     response = requests.post(
         f"{voipnow_host}/oauth/token.php",
         data=data,
@@ -92,6 +100,8 @@ def generate_token(config_mcp: dict):
             "Content-Type": "application/x-www-form-urlencoded",
             "User-Agent": "VoipNow Provisioning MCP Version/2025.2",
             },
+        verify=verify_ssl,
+        timeout=30,
     )
     response.raise_for_status()  # Raise error for 4xx/5xx responses
 

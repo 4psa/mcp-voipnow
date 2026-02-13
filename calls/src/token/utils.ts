@@ -1,4 +1,5 @@
 import fs from "fs";
+import https from "https";
 import { logger, logError } from "../logger.js";
 import { checkCert } from "../utils.js";
 import crypto from "crypto";
@@ -71,7 +72,7 @@ const HTTP_CONFIG = {
   CONTENT_TYPE: 'application/x-www-form-urlencoded',
 } as const;
 
-export async function generateToken(configMCP: any) {
+export async function generateToken(configMCP: any): Promise<void> {
   const params = new URLSearchParams();
   params.append("client_id", configMCP.appId);
   params.append("client_secret", configMCP.appSecret);
@@ -79,42 +80,69 @@ export async function generateToken(configMCP: any) {
   params.append("type", OAUTH_CONFIG.TYPE);
   params.append("redirect_uri", `${configMCP.voipnowHost}${OAUTH_CONFIG.REDIRECT_PATH}`);
 
-  // Create abort controller for timeout
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+  const body = params.toString();
+  const url = new URL(`${configMCP.voipnowHost}${OAUTH_CONFIG.TOKEN_ENDPOINT}`);
 
-  let response: Response;
-  try {
-    response = await fetch(`${configMCP.voipnowHost}${OAUTH_CONFIG.TOKEN_ENDPOINT}`, {
+  // Use https.request() instead of fetch() to properly support insecure SSL mode
+  const data: any = await new Promise((resolve, reject) => {
+    const options: https.RequestOptions = {
+      hostname: url.hostname,
+      port: url.port || 443,
+      path: url.pathname + url.search,
       method: 'POST',
       headers: {
         "Content-Type": HTTP_CONFIG.CONTENT_TYPE,
         'User-Agent': HTTP_CONFIG.USER_AGENT,
+        'Content-Length': Buffer.byteLength(body)
       },
-      body: params.toString(),
-      signal: controller.signal
+      // Add insecure SSL option if configured
+      ...(configMCP.insecure === true && {
+        rejectUnauthorized: false
+      })
+    };
+
+    const timeoutId = setTimeout(() => {
+      req.destroy();
+      reject(new Error('Token generation request timeout after 30 seconds'));
+    }, 30000);
+
+    const req = https.request(options, (res) => {
+      clearTimeout(timeoutId);
+      let responseData = '';
+
+      res.on('data', (chunk) => {
+        responseData += chunk;
+      });
+
+      res.on('end', () => {
+        try {
+          const parsedData = JSON.parse(responseData);
+
+          // Check if the response is successful
+          if (res.statusCode && res.statusCode >= 400) {
+            logger.error(`HTTP ${res.statusCode}: ${res.statusMessage} - ${responseData}`);
+            if (parsedData.error === "invalid_client") {
+              logger.error("Invalid client credentials. Please check your appId and appSecret.");
+            }
+            reject(new Error(`HTTP ${res.statusCode}: ${res.statusMessage} - ${responseData}`));
+            return;
+          }
+
+          resolve(parsedData);
+        } catch (error) {
+          reject(new Error(`Failed to parse token response: ${error}`));
+        }
+      });
     });
-    clearTimeout(timeoutId);
-  } catch (error: any) {
-    clearTimeout(timeoutId);
-    if (error.name === 'AbortError') {
-      throw new Error('Token generation request timeout after 30 seconds');
-    }
-    throw error;
-  }
 
-  // Check if the response is successful
-  if (!response.ok) {
-    const data = await response.json();
-    logger.error(`HTTP ${response.status}: ${response.statusText} - ${JSON.stringify(data)}`);
-    if (data.error === "invalid_client") {
-      logger.error("Invalid client credentials. Please check your appId and appSecret.");
-    }
-    throw new Error(`HTTP ${response.status}: ${response.statusText} - ${JSON.stringify(data)}`);
-  }
+    req.on('error', (error) => {
+      clearTimeout(timeoutId);
+      reject(error);
+    });
 
-  // Parse response
-  const data = await response.json();
+    req.write(body);
+    req.end();
+  });
 
   // Save the token to a file using atomic write
   const now = Date.now();

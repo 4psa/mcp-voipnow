@@ -33,7 +33,7 @@ export const EXTENSIONS_QUEUE_AGENTS_LIST_TOOL: Tool = {
 export async function runExtensionsQueueAgentsListTool(
     args: z.infer<typeof ExtensionsQueueAgentsListToolSchema>,
     userAgent: string,
-    config: { voipnowUrl: string; voipnowToken: string; },
+    config: { voipnowUrl: string; voipnowToken: string; agent?: any; },
     logger: Logger,
 ) {
     const { userId, extension, agent, count, filterBy, filterOp, filterValue, startIndex, fields, sortOrder } = ExtensionsQueueAgentsListToolSchema.parse(args);
@@ -99,14 +99,15 @@ export async function runExtensionsQueueAgentsListTool(
         }
 
         logger.debug(`Listing extensions queue agents for ${config.voipnowUrl}/uapi/extensions/${paramsExtensionsQueueAgentsListURL}`);
-        const response = await fetch(utils.createUrl(`${config.voipnowUrl}`, `/uapi/extensions/${paramsExtensionsQueueAgentsListURL}`), {
+        const response = await utils.secureAwareFetch(utils.createUrl(`${config.voipnowUrl}`, `/uapi/extensions/${paramsExtensionsQueueAgentsListURL}`), {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
                 "User-Agent": userAgent.toString(),
                 "Authorization": `Bearer ${config.voipnowToken}`,
             },
-            redirect: 'manual' // Prevent automatic redirection
+            redirect: 'manual', // Prevent automatic redirection
+            ...(config.agent && { agent: config.agent }),
         });
 
         // Handle non-2xx responses
