@@ -1359,25 +1359,7 @@ Complete problem investigation:
 5. Verify all problematic calls are ended"
 ```
 
-#### 8. Pattern monitoring
-
-Simple pattern check:
-```
-"Alert me if you see multiple calls from the same number within 5 minutes"
-```
-
-Complete pattern monitoring:
-```
-"Monitor our call activity and alert me when you detect:
-1. Multiple concurrent calls from the same external number
-2. Any calls lasting more than 2 hours
-3. More than 3 calls to the same number in 5 minutes
-4. Exclude our IVR extension (0003*100) from these checks"
-```
-
-These examples work with tools for active call monitoring and call history analysis.
-
-#### 9. Bulk operations
+#### 8. Bulk operations
 
 Simple bulk action:
 ```
@@ -1395,7 +1377,7 @@ Then for each call:
 3. Show me the list of affected calls"
 ```
 
-#### 10. Emergency supervision
+#### 9. Emergency supervision
 
 Simple supervision:
 ```
@@ -1405,11 +1387,11 @@ Simple supervision:
 Complete emergency handling:
 ```
 "I need full supervision control of extension 0003*042:
-1. Monitor all new calls automatically
-2. Record every call from start
-3. Let me whisper to the agent when needed
-4. Give me emergency barge-in capability
-5. Alert me of any suspicious patterns"
+1. List all active calls on the extension
+2. Start recording the current call
+3. Start silent monitoring and send the call to 0003*001
+4. Whisper to the agent on the current call
+5. Barge in to the call if needed"
 ```
 
 ### Best Practices

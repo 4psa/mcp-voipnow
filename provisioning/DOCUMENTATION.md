@@ -1873,20 +1873,25 @@ Every prompt must include these components:
 
 1. **Entity type and hierarchy:**
    - Specify the entity type (ServiceProvider/Organization/User/Extension).
-   - Include parent-child relationships.
-   - Example: "Create a user under organization ID 21"
+   - Include parent-child relationships using the full hierarchy: Admin → ServiceProvider → Organization → User → Extension.
+   - Example: "Create a user under organization 'SupportOrg'"
 
-2. **Required parameters:**
+2. **Prerequisites:**
+   - Parent entities must already exist before being referenced.
+   - When referencing an existing service provider or organization by name, ensure the account exists in VoipNow first.
+   - The Admin account is always assumed to exist at the top of the hierarchy.
+
+3. **Required parameters:**
    - Always include mandatory fields (login, name, email).
    - Use descriptive, unique identifiers.
    - Format: standardized naming conventions
 
-3. **Dependencies:**
+4. **Dependencies:**
    - Specify charging plans when needed.
    - Include necessary permissions and limits.
    - Define relationships between entities.
 
-4. **Verification steps:**
+5. **Verification steps:**
    - Request confirmation of creation.
    - Validate permissions and settings.
    - Check entity relationships.
@@ -1894,11 +1899,11 @@ Every prompt must include these components:
 Here's a complete prompt example:
 ```
 "Create a complete phone system setup:
-1. Create organization 'TestOrg' under default service provider
+1. Create organization 'TestOrg' under service provider 'Reseller1' (must already exist)
 2. Set unlimited permissions for the organization
-3. Create a user 'support_admin' under this organization
+3. Create a user 'support_admin' under organization 'TestOrg'
 4. Configure user permissions for all extension types
-5. Create extensions:
+5. Create extensions for user 'support_admin':
    - Queue (ext: 100)
    - IVR (ext: 200)
    - Conference (ext: 300)
@@ -1910,7 +1915,7 @@ Here's a complete prompt example:
 #### 1. Complete Organization Setup
 
 ```prompt
-"Set up a new organization with all necessary components:
+"Set up a new organization with all necessary components under service provider 'Reseller1' (must already exist):
 1. Create organization 'SupportTeam':
    - Login: support_org
    - Company: Support Operations
@@ -1927,34 +1932,32 @@ Here's a complete prompt example:
 #### 2. Multi-User Department Creation
 
 ```prompt
-"Create a complete support department:
-1. Create parent user 'support_admin':
+"Create a complete support department under organization 'SupportTeam' (must already exist):
+1. Create parent user 'support_admin' under organization 'SupportTeam':
    - Full administrative rights
    - Unlimited extension creation
    - Charging plan access
-2. Create team leads (3 users):
+2. Create team leads (3 users) under organization 'SupportTeam':
    - Queue management permissions
    - Conference hosting rights
-3. Create support agents (5 users):
+3. Create support agents (5 users) under organization 'SupportTeam':
    - Basic phone permissions
-   - Queue member access
-4. Set up extensions for each user type"
+4. Set up phone terminal extensions for each user"
 ```
 
 #### 3. Extension Suite Creation
 
 ```prompt
-"Create a complete extension suite for support operations:
-1. Set up main user with all permissions
-2. Create extensions in order:
+"Create a complete extension suite for user 'support_admin':
+1. Set up the user with all extension creation permissions
+2. Create extensions for the user in order:
    - Main Queue (100): Support Queue
    - IVR (200): Welcome Menu
    - Conference (300): Team Meetings
    - Voicemail (400): Message Center
    - Callback (500): Return Calls
    - Intercom (600): Announcements
-3. Verify all extensions are properly linked
-4. Configure basic settings for each"
+3. Verify all extensions were created"
 ```
 
 ### Complex Provisioning Scenarios
@@ -1963,30 +1966,30 @@ Here's a complete prompt example:
 
 ```prompt
 "Create a complete call center infrastructure:
-1. Create main organization 'CallCenter':
+1. Create main organization 'CallCenter' under service provider 'Reseller1' (must already exist):
    - Set unlimited permissions
    - Configure charging plan
-2. Create department structure:
+2. Create department structure under organization 'CallCenter':
    a. Sales Department:
-      - Manager user with full permissions
-      - Team queue extension (101)
-      - Conference room (301)
-      - 5 agent users with phone extensions
+      - Manager user with full permissions under organization 'CallCenter'
+      - Team queue extension (101) for the manager user
+      - Conference room (301) for the manager user
+      - 5 agent users with phone extensions under organization 'CallCenter'
    b. Support Department:
-      - Manager user with full permissions
-      - Priority queue extension (102)
-      - Conference room (302)
-      - IVR system (201)
-      - 10 agent users with phone extensions
+      - Manager user with full permissions under organization 'CallCenter'
+      - Priority queue extension (102) for the manager user
+      - Conference room (302) for the manager user
+      - IVR extension (201) for the manager user
+      - 10 agent users with phone extensions under organization 'CallCenter'
    c. Technical Department:
-      - Manager user with full permissions
-      - Emergency queue (103)
-      - Conference room (303)
-      - 3 specialist users with phone extensions
-3. Create shared resources:
-   - Main IVR (200)
-   - General voicemail (400)
-   - Callback system (500)
+      - Manager user with full permissions under organization 'CallCenter'
+      - Emergency queue (103) for the manager user
+      - Conference room (303) for the manager user
+      - 3 specialist users with phone extensions under organization 'CallCenter'
+3. Create shared resources for a dedicated shared user under organization 'CallCenter':
+   - Main IVR extension (200)
+   - General voicemail extension (400)
+   - Callback extension (500)
 4. Verify complete setup"
 ```
 
@@ -1994,43 +1997,37 @@ Here's a complete prompt example:
 
 ```prompt
 "Set up a new branch office with hierarchical structure:
-1. Create branch organization:
-   - Region-specific settings
+1. Create organization 'BranchOffice' under service provider 'Reseller1' (must already exist):
    - Custom charging plan
    - API access enabled
-2. Department Structure:
-   - Create 3 department managers
-   - Set up team hierarchies
-   - Configure extension ranges:
+2. Create department structure under organization 'BranchOffice':
+   - Create 3 department manager users under organization 'BranchOffice'
+   - Set up team users under organization 'BranchOffice'
+   - Create extensions for each department user in ranges:
      * Dept 1: 100-199
      * Dept 2: 200-299
      * Dept 3: 300-399
-3. Extension Setup:
-   - Queue for each department
-   - Shared conference rooms
-   - Department-specific IVRs
-4. Permission Management:
-   - Department-level access control
-   - Resource sharing rules
-   - Monitoring capabilities"
+3. Create extensions for each department manager user:
+   - Queue extension per department
+   - Shared conference room extensions
+   - Department-specific IVR extensions
+4. Set permissions and limits per user and verify access"
 ```
 
 #### 3. Automated System Migration
 
 ```prompt
 "Migrate and upgrade existing setup:
-1. Create new organization structure
-2. For each department:
-   - Create corresponding users
-   - Set up matching extensions
-   - Configure permissions
+1. Create organization 'MigratedOrg' under service provider 'Reseller1' (must already exist)
+2. For each department under organization 'MigratedOrg':
+   - Create corresponding users under organization 'MigratedOrg'
+   - Set up matching extensions for each user
+   - Set permissions and limits for each user
    - Verify charging plans
-3. Create shared resources:
-   - Queue systems
-   - Conference rooms
-   - IVR menus
+3. Create shared resources for a dedicated user under organization 'MigratedOrg':
+   - Queue extensions
+   - Conference extensions
 4. Validate complete setup:
-   - Test all extensions
    - Verify permissions
    - Check charging plans"
 ```
@@ -2045,7 +2042,6 @@ Create a user under organization ID 21 with:
 - Last Name: Auto
 - Company: orgY456
 - Email: userZ789@example.com
-Use the MCP add tool with type User.
 ```
 
 #### Set User Permissions
@@ -2058,7 +2054,6 @@ Enable sharing features:
 - Share voicemail: everybody
 - Share recordings: everybody
 - Share call history: everybody
-Use the MCP set_permissions_limits tool with type User.
 ```
 
 ### Extension Management Examples
@@ -2066,82 +2061,41 @@ Use the MCP set_permissions_limits tool with type User.
 #### 1. Queue System Setup
 
 ```prompt
-"Create a complete queue system:
-1. Create queue manager user with permissions:
+"Create a complete queue system under organization 'SupportTeam' (must already exist):
+1. Create queue manager user under organization 'SupportTeam' with permissions:
    - Queue management
    - Extension creation
-   - Call monitoring
-2. Set up queue structure:
+2. Set up queue extensions for the queue manager user:
    - Main queue (100): General Support
    - Priority queue (101): Premium Support
-   - Overflow queue (102): High Volume
-3. Configure for each queue:
-   - Welcome messages
-   - Agent assignments
-   - Queue priorities"
+   - Overflow queue (102): High Volume"
 ```
 
-#### 2. IVR Menu Creation
+#### 2. Conference System
 
 ```prompt
-"Set up multi-level IVR system:
-1. Create IVR admin user with permissions
-2. Create IVR structure:
-   - Main menu (200): Welcome
-   - Sales menu (201): Products
-   - Support menu (202): Help
-3. Link IVRs to appropriate:
-   - Queue extensions
-   - Voicemail boxes
-   - Callback systems"
-```
-
-#### 3. Conference System
-
-```prompt
-"Create conference center setup:
-1. Create conference admin user
-2. Set up conference rooms:
+"Create conference center setup under organization 'SupportTeam' (must already exist):
+1. Create conference admin user under organization 'SupportTeam'
+2. Set up conference room extensions for the admin user:
    - Main conference (300): All Hands
    - Team rooms (301-305): Department Meetings
    - Training room (306): Learning Sessions
-3. Configure each with:
-   - Access controls
-   - Recording settings
-   - Participant limits"
-```
-
-#### 4. Extension Integration
-
-```prompt
-"Create integrated extension system:
-1. Set up user hierarchy:
-   - Admin users for each type
-   - Team leaders with mixed permissions
-   - Regular users with basic access
-2. Create linked extensions:
-   - Queue -> IVR routing
-   - Conference -> Queue integration
-   - Voicemail -> Callback system
-3. Configure routing rules
-4. Test all integrations"
+3. Verify all conference extensions were created"
 ```
 
 ### Charging Plan Management
 
 #### Get Charging Plans
 ```prompt
-Retrieve available charging plans for:
-- All plans: Use MCP get_charging_plan tool with type Billing
-- Specific user's plans: Add userID parameter
-- Default plans only: Add default parameter true
+Retrieve available charging plans:
+- All plans
+- Specific user's plans: specify the userID
+- Default plans only: filter by default=true
 ```
 
 #### Query Specific Plan
 ```prompt
 Get details of charging plan ID 1:
-- Use MCP get_charging_plan tool
-- Add specific plan ID
 - Check plan type (postpaid/prepaid)
 - Verify if it's a default plan
 ```
@@ -2151,15 +2105,15 @@ Get details of charging plan ID 1:
 ```prompt
 Provision a phone terminal extension in VoipNow using only the available MCP tools from the VoipNow Provisioning MCP server. The workflow must be fully automated and include:
 
-1. Create a service provider (reseller) with a random name and email using only the MCP add tool.
-2. Set all permissions, limits, and expiration for the service provider to "unlimited" using only the MCP set_permissions_limits tool.
-3. Create a postpaid charging plan under the service provider using only the MCP tools.
-4. Create an organization under the service provider with a random name and email using only the MCP add tool.
-5. Set all permissions, limits, and expiration for the organization to "unlimited" using only the MCP set_permissions_limits tool.
-6. Create a postpaid charging plan under the organization using only the MCP tools.
-7. Create a user under the organization with a random name and email using only the MCP add tool.
-8. Set all permissions, limits, and expiration for the user to "unlimited" using only the MCP set_permissions_limits tool.
-9. Create a phone terminal extension for the user, using a random valid extension number and label, and auto-generate the password, using only the MCP add_extension tool.
+1. Create a service provider (reseller) with a random name and email.
+2. Set all permissions, limits, and expiration for the service provider to "unlimited".
+3. Create a postpaid charging plan under the service provider.
+4. Create an organization under the service provider with a random name and email.
+5. Set all permissions, limits, and expiration for the organization to "unlimited".
+6. Create a postpaid charging plan under the organization.
+7. Create a user under the organization with a random name and email.
+8. Set all permissions, limits, and expiration for the user to "unlimited".
+9. Create a phone terminal extension for the user, using a random valid extension number and label, and auto-generate the password.
 
 All steps must use only the MCP tools, and all dependencies (IDs, parent-child relationships) must be respected. The process should be robust, fully automated, and require no manual input at any step.
 ```
@@ -2196,8 +2150,8 @@ All steps must use only the MCP tools, and all dependencies (IDs, parent-child r
    - Verify permission propagation.
 
 3. **After changes:**
-   - Test affected extensions.
-   - Verify user access.
+   - Verify affected extensions using get-extension-details.
+   - Verify user access using get-permissions-limits.
    - Document configuration.
 
 #### Best Practices
@@ -2226,32 +2180,27 @@ All steps must use only the MCP tools, and all dependencies (IDs, parent-child r
 
 1. **Extension issues:**
    ```prompt
-   "Verify and repair extension 0003*101:
-   1. Check extension exists
+   "Verify extension 0003*101:
+   1. Check extension exists using get-extension-details
    2. Verify user permissions
-   3. Validate charging plan
-   4. Reset if necessary
-   5. Test functionality"
+   3. Validate charging plan"
    ```
 
 2. **Permission problems:**
    ```prompt
    "Fix user permissions for support team:
-   1. Check current permissions
+   1. Check current permissions using get-permissions-limits
    2. Compare with required setup
-   3. Update as needed
-   4. Verify changes
-   5. Test access"
+   3. Update as needed using update-permissions-limits
+   4. Verify changes"
    ```
 
 3. **System verification:**
    ```prompt
    "Validate complete setup:
-   1. List all extensions
-   2. Check user permissions
-   3. Verify relationships
-   4. Test integrations
-   5. Document status"
+   1. List all extensions using get-extensions
+   2. Check user permissions using get-permissions-limits
+   3. Verify parent-child relationships using get-details"
    ```
 
 #### Common Parameters
